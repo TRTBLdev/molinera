@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Molinera - Sous-Chef Digital</title>
+  <meta name="description" content="Gestión local-first de despensa y taller de cocina para Molinera.">
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Main Stylesheet -->
+  <link rel="stylesheet" href="css/styles.css?v=1.2.1">
+  <!-- PWA Manifest -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#ffffff">
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="assets/logo_icon.png">
+</head>
+<body>
+  <!-- Invitation Access Screen -->
+  <div id="access-container" class="access-overlay">
+    <div class="access-card">
+      <div class="access-logo">
+        <span class="logo-text-main">M</span>OLINERA<span class="dot-accent">.</span>
+      </div>
+      <h2>Código de Invitación</h2>
+      <p class="access-subtitle">Por favor, introduce tu código para acceder a la aplicación.</p>
+      
+      <div class="access-form-group">
+        <input type="password" id="input-access-code" placeholder="Ingresa tu código..." autofocus>
+        <button id="btn-submit-access">Acceder</button>
+      </div>
+      <p id="access-error-msg" class="access-error" style="display: none;">Código inválido. Intenta de nuevo.</p>
+    </div>
+  </div>
+
+  <div class="app-wrapper">
+    
+    <!-- Mobile Header (Visible only on Mobile) -->
+    <header class="mobile-top-header">
+      <div class="brand-logo"><span class="logo-text-main">M</span><span class="logo-text-hide">OLINERA</span><span class="dot-accent">.</span></div>
+      <span class="settings-icon">⚙️</span>
+    </header>
+
+    <!-- Sidebar Navigation (Desktop & Tablet) -->
+    <aside class="app-sidebar">
+      <div class="brand-area">
+        <div class="brand-logo"><span class="logo-text-main">M</span><span class="logo-text-hide">OLINERA</span><span class="dot-accent">.</span></div>
+        <div class="brand-tagline">SOUS-CHEF DIGITAL</div>
+      </div>
+      
+      <nav class="sidebar-nav">
+        <button class="nav-btn active" data-tab="infraestructura" id="btn-tab-infraestructura">
+          <span class="icon-svg">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>
+            </svg>
+          </span>
+          <span class="label">Infraestructura</span>
+        </button>
+        <button class="nav-btn" data-tab="despensa" id="btn-tab-despensa">
+          <span class="icon-svg">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+              <line x1="3" y1="6" x2="21" y2="6"></line>
+              <path d="M16 10a4 4 0 0 1-8 0"></path>
+            </svg>
+          </span>
+          <span class="label">La Despensa</span>
+        </button>
+        <button class="nav-btn" data-tab="molino" id="btn-tab-molino">
+          <span class="icon-svg">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="23 4 12 15 8 11 1 18"></polyline>
+              <polyline points="17 4 23 4 23 10"></polyline>
+            </svg>
+          </span>
+          <span class="label">El Molino</span>
+        </button>
+      </nav>
+      
+      <div class="sidebar-footer">
+        <div class="status-indicator" id="save-status">
+          <span class="dot"></span> Local-first
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <div class="main-layout">
+      <!-- Top Bar (Desktop & Tablet) -->
+      <header class="top-bar">
+        <div class="search-box-top">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="top-search" placeholder="Buscar equipo, utensilio o envase...">
+        </div>
+        <div class="top-actions">
+          <button class="btn-add-item" id="btn-add-item-modal">+ Añadir Item</button>
+          <span class="settings-icon">⚙️</span>
+        </div>
+      </header>
+
+      <!-- Main Panels -->
+      <main class="app-content">
+        
+        <!-- Pestaña 1: Infraestructura (Taller, Alacena Maestra, Database backup) -->
+        <section class="tab-panel active" id="panel-infraestructura">
+          <div class="panel-header">
+            <h2>Infraestructura</h2>
+            <p>Configura los recursos estáticos de tu cocina e ingredientes indispensables.</p>
+          </div>
+
+          <!-- Machinery Grid -->
+          <div class="section-block">
+            <div class="section-header-line collapsible-header static-collapsible"><span>EQUIPO DE COCINA</span></div>
+            <div class="machinery-grid collapsible-content" id="machinery-container">
+              <!-- Cards generated dynamically -->
+            </div>
+          </div>
+
+          <!-- Utensils Grid -->
+          <div class="section-block">
+            <div class="section-header-line collapsible-header static-collapsible"><span>UTENSILIOS Y MENAJE</span></div>
+            <div class="machinery-grid collapsible-content" id="utensils-container">
+              <!-- Cards generated dynamically -->
+            </div>
+          </div>
+
+          <!-- Storage Containers List -->
+          <div class="section-block">
+            <div class="section-header-line collapsible-header static-collapsible"><span>ENVASES DE ALMACENAMIENTO</span></div>
+            <div class="storage-lists-container collapsible-content">
+              
+              <!-- Grandes -->
+              <div class="storage-category-section">
+                <div class="storage-cat-header collapsible-header static-collapsible">
+                  <h3>GRANDES (2L+)</h3>
+                  <span class="total-badge" id="badge-total-grandes">0 TOTAL</span>
+                </div>
+                <div class="storage-list collapsible-content" id="storage-list-grandes">
+                  <!-- Container items -->
+                </div>
+              </div>
+
+              <!-- Medianos -->
+              <div class="storage-category-section">
+                <div class="storage-cat-header collapsible-header static-collapsible">
+                  <h3>MEDIANOS (1L)</h3>
+                  <span class="total-badge" id="badge-total-medianos">0 TOTAL</span>
+                </div>
+                <div class="storage-list collapsible-content" id="storage-list-medianos">
+                  <!-- Container items -->
+                </div>
+              </div>
+
+              <!-- Pequeños -->
+              <div class="storage-category-section">
+                <div class="storage-cat-header collapsible-header static-collapsible">
+                  <h3>PEQUEÑOS (&lt;500ML)</h3>
+                  <span class="total-badge" id="badge-total-pequenos">0 TOTAL</span>
+                </div>
+                <div class="storage-list collapsible-content" id="storage-list-pequenos">
+                  <!-- Container items -->
+                </div>
+              </div>
+
+              </div>
+            </div>
+
+          <!-- Alacena Maestra Configurator (Move inside Infraestructura) -->
+          <div class="section-block">
+            <div class="section-header-line collapsible-header static-collapsible"><span>ALACENA MAESTRA (Biblioteca General)</span></div>
+            
+            <div class="section-card collapsible-content">
+              <div class="search-and-add">
+                <div class="search-box">
+                  <span class="search-icon">🔍</span>
+                  <input type="text" id="ingredient-search" placeholder="Buscar ingrediente en la biblioteca...">
+                </div>
+                <div class="add-custom-box">
+                  <input type="text" id="custom-ingredient-name" placeholder="Añadir ingrediente personalizado...">
+                  <select id="custom-ingredient-category">
+                    <option value="proteinas">Proteínas</option>
+                    <option value="carbohidratos">Carbohidratos</option>
+                    <option value="grasas">Grasas y Aceites</option>
+                    <option value="vegetales">Vegetales y Frutas</option>
+                    <option value="despensa">Básicos de Despensa</option>
+                    <option value="condimentos">Especies y Salsas</option>
+                  </select>
+                  <button class="btn-primary" id="btn-add-custom">Agregar</button>
+                </div>
+              </div>
+
+              <div class="master-selection-container" id="master-selection-container">
+                <!-- Dynamic selection lists -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Database backups -->
+          <div class="section-block">
+            <div class="section-header-line collapsible-header static-collapsible"><span>Copia de Seguridad y Respaldos</span></div>
+            <div class="section-card collapsible-content" style="padding: 20px 0;">
+              <div class="data-actions-grid">
+                <button class="btn-data-action download" id="btn-download-json">
+                  <span class="btn-icon">📥</span>
+                  <span class="btn-label">Exportar Base de Datos</span>
+                </button>
+                <label class="btn-data-action upload" id="btn-upload-label">
+                  <span class="btn-icon">📤</span>
+                  <span class="btn-label">Importar Base de Datos</span>
+                  <input type="file" id="input-upload-json" accept=".json" style="display: none;">
+                </label>
+
+                <button class="btn-data-action reset" id="btn-reset-factory">
+                  <span class="btn-icon">⚠️</span>
+                  <span class="btn-label">Reiniciar de Fábrica</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+        </section>
+
+        <!-- Pestaña 2: La Despensa (Weekly Audit, Click to Cycle) -->
+        <section class="tab-panel" id="panel-despensa">
+          <div class="panel-header">
+            <h2>La Despensa</h2>
+            <p>Auditoría rápida. Haz clic/tap en un ingrediente para cambiar su nivel.</p>
+          </div>
+
+          <div class="pantry-dashboard">
+            <div class="pantry-summary-bar">
+              <span class="summary-pill optimal">Óptimo: <strong id="count-optimal">0</strong></span>
+              <span class="summary-pill medium">Medio: <strong id="count-medium">0</strong></span>
+              <span class="summary-pill critical">Crítico: <strong id="count-critical">0</strong></span>
+              <span class="summary-pill empty">Agotado: <strong id="count-empty">0</strong></span>
+            </div>
+
+            <div class="pantry-categories" id="pantry-categories-container">
+              <!-- Dynamic category tables with click-to-cycle text fields -->
+            </div>
+          </div>
+        </section>
+
+        <!-- Pestaña 3: El Molino (Acción, Hormonas, Rescate, Prompt) -->
+        <section class="tab-panel" id="panel-molino">
+          <div class="panel-header">
+            <h2>El Molino</h2>
+            <p>Define las variables hormonales, los perecederos a rescatar y crea tu Prompt Maestro.</p>
+          </div>
+
+          <div class="grid-two-columns">
+            <!-- Left Column: Parameters -->
+            <div class="col">
+              <!-- Biological Phase Selector -->
+              <div class="section-card">
+                <h3 class="collapsible-header static-collapsible">🗓️ Ciclo Biológico & Temporal</h3>
+                
+                <div class="collapsible-content">
+                  <div class="form-group">
+                    <label for="select-menstrual-phase">Fase del Ciclo (Cíclica)</label>
+                    <select id="select-menstrual-phase">
+                      <option value="menstrual">Menstrual (Fase de quietud)</option>
+                      <option value="folicular">Ficular (Fase de energía)</option>
+                      <option value="ovulatoria">Ovulatoria (Fase expresiva)</option>
+                      <option value="lutea">Lútea (Fase de nido/quietud)</option>
+                      <option value="no_menstrual">No Menstrual / Ciclo Energético</option>
+                    </select>
+                  </div>
+
+                  <div class="form-group" style="margin-top: 12px;">
+                    <label for="select-planning-type">Escala de Planificación</label>
+                    <div class="planning-toggle-container">
+                      <button class="btn-plan-toggle active" data-plan="semanal" id="btn-plan-semanal">Semanal (Micro)</button>
+                      <button class="btn-plan-toggle" data-plan="mensual" id="btn-plan-mensual">Mensual (Macro)</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Preferencias Alimenticias (Collapsed by default) -->
+              <div class="section-card">
+                <h3 class="collapsible-header static-collapsible collapsed">🥑 Preferencias Alimenticias</h3>
+                
+                <div class="collapsible-content collapsed">
+                  <div class="form-group">
+                    <label>¿Sigues alguna de estas dietas?</label>
+                    <div class="diet-grid">
+                      <div class="diet-card" data-diet="ninguna">
+                        <div class="diet-icon">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <path d="m4.93 4.93 14.14 14.14"></path>
+                          </svg>
+                        </div>
+                        <span class="diet-name">Ninguna</span>
+                      </div>
+                      <div class="diet-card" data-diet="vegan">
+                        <div class="diet-icon">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"></path>
+                            <path d="M7.5 10.5c1.5-1.5 3.5-1.5 5 0s1.5 3.5 0 5-3.5 1.5-5 0-1.5-3.5 0-5z"></path>
+                            <path d="m11.5 11.5 5-5"></path>
+                          </svg>
+                        </div>
+                        <span class="diet-name">Vegana</span>
+                      </div>
+                      <div class="diet-card" data-diet="vegetarian">
+                        <div class="diet-icon">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M2 22c1.25-1.67 3.5-3 6.5-3s5.25 1.33 6.5 3"></path>
+                            <path d="M12 2a5 5 0 0 0-5 5v5a5 5 0 0 0 10 0V7a5 5 0 0 0-5-5z"></path>
+                          </svg>
+                        </div>
+                        <span class="diet-name">Vegetariana</span>
+                      </div>
+                      <div class="diet-card" data-diet="pescatarian">
+                        <div class="diet-icon">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M23 12c0-3.3-3.1-6-7-6-1.5 0-3 .4-4.2 1.2L2 2.5v19l9.8-4.7c1.2.8 2.7 1.2 4.2 1.2 3.9 0 7-2.7 7-6z"></path>
+                            <circle cx="16" cy="12" r="1.5"></circle>
+                          </svg>
+                        </div>
+                        <span class="diet-name">Pescetariana</span>
+                      </div>
+                      <div class="diet-card" data-diet="paleo">
+                        <div class="diet-icon">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 2c-4 0-8 .5-8 4v8c0 4 3 6 8 6s8-2 8-6V6c0-3.5-4-4-8-4z"></path>
+                            <path d="M12 6v12M8 12h8"></path>
+                          </svg>
+                        </div>
+                        <span class="diet-name">Paleo</span>
+                      </div>
+                      <div class="diet-card" data-diet="low-carb">
+                        <div class="diet-icon">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 22s-8-4-8-10V5l8-3 8 3v7c0 6-8 10-8 10z"></path>
+                          </svg>
+                        </div>
+                        <span class="diet-name">Baja en Carb.</span>
+                      </div>
+                      <div class="diet-card" data-diet="keto">
+                        <div class="diet-icon">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M3 6h18M3 12h18M3 18h18"></path>
+                          </svg>
+                        </div>
+                        <span class="diet-name">Keto</span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div class="form-group" style="margin-top: 16px;">
+                    <label>¿Alguna alergia o intolerancia?</label>
+                    <div class="allergies-flex">
+                      <div class="allergy-chip" data-allergy="gluten">Gluten</div>
+                      <div class="allergy-chip" data-allergy="dairy">Lácteos</div>
+                      <div class="allergy-chip" data-allergy="egg">Huevo</div>
+                      <div class="allergy-chip" data-allergy="soy">Soya</div>
+                      <div class="allergy-chip" data-allergy="peanut">Maní</div>
+                      <div class="allergy-chip" data-allergy="tree_nut">Nueces</div>
+                      <div class="allergy-chip" data-allergy="fish">Pescado</div>
+                      <div class="allergy-chip" data-allergy="shellfish">Mariscos</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- MTC / BaZi Selections (Collapsed by default, optional) -->
+              <div class="section-card">
+                <h3 class="collapsible-header static-collapsible collapsed">☯️ Perfil Energético (MTC & BaZi)</h3>
+                
+                <div class="collapsible-content collapsed">
+                  <p class="subtitle" style="margin-bottom: 12px;">Opcional. Utiliza una calculadora BaZi externa y registra tu perfil metabólico-energético.</p>
+                  
+                  <div class="form-group">
+                    <label for="select-day-master">Day Master (Tronco del Día)</label>
+                    <select id="select-day-master">
+                      <option value="">No especificado</option>
+                      <option value="Madera Yang">Madera Yang</option>
+                      <option value="Madera Yin">Madera Yin</option>
+                      <option value="Fuego Yang">Fuego Yang</option>
+                      <option value="Fuego Yin">Fuego Yin</option>
+                      <option value="Tierra Yang">Tierra Yang</option>
+                      <option value="Tierra Yin">Tierra Yin</option>
+                      <option value="Metal Yang">Metal Yang</option>
+                      <option value="Metal Yin">Metal Yin</option>
+                      <option value="Agua Yang">Agua Yang</option>
+                      <option value="Agua Yin">Agua Yin</option>
+                    </select>
+                  </div>
+
+                  <div class="form-group" style="margin-top: 12px;">
+                    <label for="select-dominant-element">Elemento Dominante</label>
+                    <select id="select-dominant-element">
+                      <option value="">No especificado</option>
+                      <option value="Madera">Madera</option>
+                      <option value="Fuego">Fuego</option>
+                      <option value="Tierra">Tierra</option>
+                      <option value="Metal">Metal</option>
+                      <option value="Agua">Agua</option>
+                    </select>
+                  </div>
+
+                  <div class="form-group" style="margin-top: 12px;">
+                    <label for="select-deficient-element">Elemento Deficiente</label>
+                    <select id="select-deficient-element">
+                      <option value="">No especificado</option>
+                      <option value="Ninguno">Ninguno</option>
+                      <option value="Madera">Madera</option>
+                      <option value="Fuego">Fuego</option>
+                      <option value="Tierra">Tierra</option>
+                      <option value="Metal">Metal</option>
+                      <option value="Agua">Agua</option>
+                    </select>
+                  </div>
+
+                  <div class="form-group" style="margin-top: 12px;">
+                    <label for="select-fisiological-pattern">Patrón Fisiológico (MTC)</label>
+                    <select id="select-fisiological-pattern">
+                      <option value="">No especificado</option>
+                      <option value="Exceso de Calor / Estancamiento de Qi">Exceso de Calor / Estancamiento de Qi</option>
+                      <option value="Deficiencia de Yin / Sequedad">Deficiencia de Yin / Sequedad</option>
+                      <option value="Deficiencia de Yang / Frío Interno">Deficiencia de Yang / Frío Interno</option>
+                      <option value="Estancamiento de Humedad-Flema">Estancamiento de Humedad-Flema</option>
+                      <option value="Deficiencia de Sangre y Qi">Deficiencia de Sangre y Qi</option>
+                    </select>
+                    <p class="form-help-text">Opcional. Identifica tu tendencia si has consultado a un terapeuta de MTC. Si no lo sabes, déjalo en 'No especificado'.</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Escuadrón de Rescate -->
+              <div class="section-card">
+                <h3 class="collapsible-header static-collapsible">🚒 Escuadrón de Rescate (Perecederos)</h3>
+                <div class="collapsible-content">
+                  <div class="form-group">
+                    <textarea id="textarea-rescue" placeholder="Escribe qué alimentos de tu nevera se van a dañar hoy o mañana..."></textarea>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Central Action buttons -->
+              <button class="btn-create-context" id="btn-create-context">Crear Contexto</button>
+            </div>
+
+            <!-- Right Column: Visual Prompt Output -->
+            <div class="col">
+              <div class="section-card main-prompt-card">
+                <div class="prompt-header">
+                  <h3>📜 Tu Prompt Maestro Conversacional</h3>
+                  
+                  <div class="prompt-actions">
+                    <!-- Clean SVG copy button icon (No text) -->
+                    <button class="btn-copy-icon" id="btn-copy-prompt" title="Copiar Prompt al Portapapeles">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                      </svg>
+                    </button>
+                    <!-- Explicit Context download button -->
+                    <button class="btn-download-context" id="btn-download-context" title="Descargar archivo JSON de contexto">
+                      Descargar Contexto (.json)
+                    </button>
+                  </div>
+                </div>
+
+                <!-- visual Markdown container (hides the JSON block from view) -->
+                <div class="prompt-body-preview">
+                  <div class="markdown-preview" id="markdown-preview-content">
+                    Haz clic en "Crear Contexto" para compilar tu ficha del menú.
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+      </main>
+    </div>
+
+    <!-- Mobile Bottom Navigation (Visible only on Mobile) -->
+    <nav class="mobile-bottom-nav">
+      <button class="nav-btn active" data-tab="infraestructura">
+        <span class="icon-svg">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>
+          </svg>
+        </span>
+        <span class="label">Equipos</span>
+      </button>
+      <button class="nav-btn" data-tab="despensa">
+        <span class="icon-svg">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <path d="M16 10a4 4 0 0 1-8 0"></path>
+          </svg>
+        </span>
+        <span class="label">Despensa</span>
+      </button>
+      <button class="nav-btn" data-tab="molino">
+        <span class="icon-svg">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="23 4 12 15 8 11 1 18"></polyline>
+            <polyline points="17 4 23 4 23 10"></polyline>
+          </svg>
+        </span>
+        <span class="label">El Molino</span>
+      </button>
+    </nav>
+
+  </div>
+
+  <!-- Sharp Edged Item Modal Dialog -->
+  <div class="modal-backdrop" id="item-modal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="modal-title">Añadir Item</h3>
+        <button class="modal-close" id="btn-close-modal">×</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="modal-edit-id">
+        <input type="hidden" id="modal-edit-type">
+        
+        <div class="form-group" id="group-item-type">
+          <label for="modal-item-type">Tipo de Item</label>
+          <select id="modal-item-type">
+            <option value="maquinaria">Equipo / Maquinaria</option>
+            <option value="utensilio">Utensilio / Menaje</option>
+            <option value="almacenamiento">Envase de Almacenamiento</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label for="modal-name">Nombre</label>
+          <input type="text" id="modal-name" placeholder="Ej: Sartén Wok, Licuadora..." required>
+        </div>
+        
+        <div class="form-group" id="group-desc">
+          <label for="modal-desc">Descripción corta o capacidad</label>
+          <input type="text" id="modal-desc" placeholder="Ej: Diámetro 28cm, Capacidad 1.5L..." required>
+        </div>
+        
+        <!-- Only for storage envases -->
+        <div class="form-group" id="group-storage-category" style="display: none;">
+          <label for="modal-storage-category">Categoría de Capacidad</label>
+          <select id="modal-storage-category">
+            <option value="grandes">Grande (2L+)</option>
+            <option value="medianos">Mediano (1L)</option>
+            <option value="pequenos">Pequeño (&lt;500ml)</option>
+          </select>
+        </div>
+        
+        <div class="form-group" id="group-storage-count" style="display: none;">
+          <label for="modal-storage-count">Cantidad Disponible</label>
+          <input type="number" id="modal-storage-count" min="0" value="0">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-cancel" id="btn-cancel-modal">Cancelar</button>
+        <button class="btn-primary" id="btn-save-modal">Guardar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification System -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- Main JavaScript modules -->
+  <script src="js/ingredients_db.js?v=1.2.1"></script>
+  <script src="js/db.js?v=1.2.1"></script>
+  <script src="js/app.js?v=1.2.1"></script>
+</body>
+</html>
