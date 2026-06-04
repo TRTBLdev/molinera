@@ -40,6 +40,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const tabPanels = document.querySelectorAll(".tab-panel");
   const topSearch = document.getElementById("top-search");
   const btnAddItemModal = document.getElementById("btn-add-item-modal");
+  const btnAddItemModalInfra = document.getElementById("btn-add-item-modal-infra");
 
   // Taller List Nodes
   const machineryContainer = document.getElementById("machinery-container");
@@ -106,6 +107,15 @@ document.addEventListener("DOMContentLoaded", () => {
   const btnCloseModal = document.getElementById("btn-close-modal");
   const btnCancelModal = document.getElementById("btn-cancel-modal");
   const btnSaveModal = document.getElementById("btn-save-modal");
+
+  // Settings Modal Nodes
+  const settingsIcons = document.querySelectorAll(".settings-icon");
+  const settingsModal = document.getElementById("settings-modal");
+  const btnCloseSettings = document.getElementById("btn-close-settings");
+  const btnCloseSettingsFooter = document.getElementById("btn-close-settings-footer");
+  const btnSettingsDownload = document.getElementById("btn-settings-download");
+  const inputSettingsUploadJson = document.getElementById("input-settings-upload-json");
+  const btnSettingsReset = document.getElementById("btn-settings-reset");
 
   // Active Tab state helper
   let activeTab = "infraestructura";
@@ -528,7 +538,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // --- Modal Form Actions ---
-  btnAddItemModal.addEventListener("click", () => {
+  function openAddModal() {
     modalTitle.textContent = "Añadir Item";
     modalEditId.value = "";
     modalEditType.value = "";
@@ -542,7 +552,10 @@ document.addEventListener("DOMContentLoaded", () => {
     toggleModalFields("maquinaria");
     
     itemModal.classList.add("show");
-  });
+  }
+
+  if (btnAddItemModal) btnAddItemModal.addEventListener("click", openAddModal);
+  if (btnAddItemModalInfra) btnAddItemModalInfra.addEventListener("click", openAddModal);
 
   modalItemType.addEventListener("change", () => {
     toggleModalFields(modalItemType.value);
@@ -1230,14 +1243,15 @@ ${data.ejecucion.rescate_perecederos.trim() ? `> ${data.ejecucion.rescate_perece
     showToast("Archivo JSON de contexto descargado.", "success");
   });
 
-  // --- Database Backups triggers (Infraestructura tab) ---
-  btnDownloadJson.addEventListener("click", () => {
+  // --- Database Backups triggers (Infraestructura tab & Settings Modal) ---
+  function triggerBackupDownload() {
     DB.exportToFile(state);
     showToast("Respaldo de base de datos descargado.", "success");
-  });
+  }
+  btnDownloadJson.addEventListener("click", triggerBackupDownload);
+  if (btnSettingsDownload) btnSettingsDownload.addEventListener("click", triggerBackupDownload);
 
-  inputUploadJson.addEventListener("change", (e) => {
-    const file = e.target.files[0];
+  function handleBackupImport(file) {
     if (!file) return;
 
     const reader = new FileReader();
@@ -1253,15 +1267,26 @@ ${data.ejecucion.rescate_perecederos.trim() ? `> ${data.ejecucion.rescate_perece
         filterUI();
         updatePlanningUI();
         showToast("Base de datos importada correctamente.", "success");
+        closeSettingsModal();
       } else {
         showToast(`Error al importar: ${result.error}`, "error");
       }
-      inputUploadJson.value = "";
     };
     reader.readAsText(file);
-  });
+  }
 
-  btnResetFactory.addEventListener("click", () => {
+  inputUploadJson.addEventListener("change", (e) => {
+    handleBackupImport(e.target.files[0]);
+    inputUploadJson.value = "";
+  });
+  if (inputSettingsUploadJson) {
+    inputSettingsUploadJson.addEventListener("change", (e) => {
+      handleBackupImport(e.target.files[0]);
+      inputSettingsUploadJson.value = "";
+    });
+  }
+
+  function triggerFactoryReset() {
     const confirmReset = confirm("🚨 ¿Deseas reiniciar de fábrica? Esto vaciará permanentemente tus inventarios locales.");
     if (confirmReset) {
       state = DB.reset();
@@ -1270,7 +1295,37 @@ ${data.ejecucion.rescate_perecederos.trim() ? `> ${data.ejecucion.rescate_perece
       showToast("App restablecida de fábrica.", "warning");
       setTimeout(() => location.reload(), 1000);
     }
+  }
+  btnResetFactory.addEventListener("click", triggerFactoryReset);
+  if (btnSettingsReset) btnSettingsReset.addEventListener("click", triggerFactoryReset);
+
+  // Settings Modal controls
+  settingsIcons.forEach(icon => {
+    icon.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      
+      // Control factory reset display according to role
+      if (state.access_role === "invitado") {
+        btnSettingsReset.style.display = "none";
+      } else {
+        btnSettingsReset.style.display = "flex";
+      }
+      
+      settingsModal.classList.add("show");
+    });
   });
+
+  function closeSettingsModal() {
+    settingsModal.classList.remove("show");
+  }
+  if (btnCloseSettings) btnCloseSettings.addEventListener("click", closeSettingsModal);
+  if (btnCloseSettingsFooter) btnCloseSettingsFooter.addEventListener("click", closeSettingsModal);
+  if (settingsModal) {
+    settingsModal.addEventListener("click", (e) => {
+      if (e.target === settingsModal) closeSettingsModal();
+    });
+  }
 
   function getIngredientCategory(name) {
     if (state.despensa_viva.custom_categories && state.despensa_viva.custom_categories[name]) {

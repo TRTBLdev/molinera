@@ -273,6 +273,10 @@ body {
   text-decoration: underline;
 }
 
+.mobile-add-btn {
+  display: none !important;
+}
+
 .settings-icon {
   width: 20px;
   height: 20px;
@@ -1595,6 +1599,22 @@ textarea:focus {
 
   .top-bar {
     display: none;
+  }
+
+  .mobile-add-btn {
+    display: inline-block !important;
+    font-size: 11px !important;
+    font-weight: 700;
+    padding: 6px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 0;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .mobile-add-btn:hover {
+    border-color: var(--color-dark);
+    text-decoration: none;
   }
 
   .mobile-top-header {

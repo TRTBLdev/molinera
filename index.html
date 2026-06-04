@@ -114,11 +114,13 @@
       <!-- Main Panels -->
       <main class="app-content">
         
-        <!-- Pestaña 1: Infraestructura (Taller, Alacena Maestra, Database backup) -->
         <section class="tab-panel active" id="panel-infraestructura">
-          <div class="panel-header">
-            <h2>Infraestructura</h2>
-            <p>Configura los recursos estáticos de tu cocina e ingredientes indispensables.</p>
+          <div class="panel-header" style="display: flex; justify-content: space-between; align-items: flex-start; gap: 16px;">
+            <div>
+              <h2>Infraestructura</h2>
+              <p>Configura los recursos estáticos de tu cocina e ingredientes indispensables.</p>
+            </div>
+            <button class="btn-add-item mobile-add-btn" id="btn-add-item-modal-infra" style="margin-top: 4px;">+ Añadir Item</button>
           </div>
 
           <!-- Machinery Grid -->
@@ -579,6 +581,42 @@
       <div class="modal-footer">
         <button class="btn-cancel" id="btn-cancel-modal">Cancelar</button>
         <button class="btn-primary" id="btn-save-modal">Guardar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Settings & Backup Modal Dialog -->
+  <div class="modal-backdrop" id="settings-modal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Configuración y Respaldos</h3>
+        <button class="modal-close" id="btn-close-settings">×</button>
+      </div>
+      <div class="modal-body">
+        <p class="form-help-text" style="margin-bottom: 20px;">
+          Gestiona las copias de seguridad de tus datos locales. Todos los datos se guardan localmente en tu navegador.
+        </p>
+        
+        <div class="form-group">
+          <label>Copias de Seguridad</label>
+          <div class="settings-actions-grid" style="display: flex; flex-direction: column; gap: 12px; margin-top: 8px;">
+            <button class="btn-primary" id="btn-settings-download" style="width: 100%; justify-content: center; display: flex; align-items: center; gap: 8px;">
+              <span>📥</span> Exportar Base de Datos
+            </button>
+            
+            <label class="btn-primary" id="btn-settings-upload-label" style="width: 100%; justify-content: center; display: flex; align-items: center; gap: 8px; cursor: pointer; text-align: center; box-sizing: border-box; padding: 10px;">
+              <span>📤</span> Importar Base de Datos
+              <input type="file" id="input-settings-upload-json" accept=".json" style="display: none;">
+            </label>
+            
+            <button class="btn-cancel" id="btn-settings-reset" style="width: 100%; border: 1px solid var(--color-level-critico); color: var(--color-level-critico); background: transparent; justify-content: center; display: flex; align-items: center; gap: 8px;">
+              <span>⚠️</span> Reiniciar de Fábrica
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-primary" id="btn-close-settings-footer" style="width: 100%;">Cerrar</button>
       </div>
     </div>
   </div>
