@@ -96,6 +96,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const modalName = document.getElementById("modal-name");
   const modalDesc = document.getElementById("modal-desc");
   const groupDesc = document.getElementById("group-desc");
+  const modalLongDesc = document.getElementById("modal-long-desc");
+  const groupLongDesc = document.getElementById("group-long-desc");
   const groupStorageCategory = document.getElementById("group-storage-category");
   const modalStorageCategory = document.getElementById("modal-storage-category");
   const groupStorageCount = document.getElementById("group-storage-count");
@@ -284,8 +286,22 @@ document.addEventListener("DOMContentLoaded", () => {
           </button>
         </div>
         <div class="machine-card-body">
-          <h4>${item.name}</h4>
+          <div class="machine-title-row">
+            <h4>${item.name}</h4>
+            ${item.longDesc ? `
+              <button class="btn-note-toggle" title="Ver tecnología y funciones">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="note-icon-svg">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                  <polyline points="14 2 14 8 20 8"></polyline>
+                  <line x1="16" y1="13" x2="8" y2="13"></line>
+                  <line x1="16" y1="17" x2="8" y2="17"></line>
+                  <polyline points="10 9 9 9 8 9"></polyline>
+                </svg>
+              </button>
+            ` : ""}
+          </div>
           <p>${item.desc || ""}</p>
+          ${item.longDesc ? `<div class="machine-long-desc">${item.longDesc}</div>` : ""}
         </div>
         <span class="card-status-badge ${item.owned ? "owned" : "unowned"}">
           ${item.owned ? "Tengo" : "No tengo"}
@@ -293,12 +309,23 @@ document.addEventListener("DOMContentLoaded", () => {
       `;
 
       card.addEventListener("click", (e) => {
-        if (e.target.closest(".card-actions-hover")) return;
+        if (e.target.closest(".card-actions-hover") || e.target.closest(".btn-note-toggle")) return;
         item.owned = !item.owned;
         DB.save(state);
         triggerSaveIndicator();
         renderMachinery(q);
       });
+
+      if (item.longDesc) {
+        card.querySelector(".btn-note-toggle").addEventListener("click", (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          const descEl = card.querySelector(".machine-long-desc");
+          const btnEl = card.querySelector(".btn-note-toggle");
+          descEl.classList.toggle("expanded");
+          btnEl.classList.toggle("active");
+        });
+      }
 
       card.querySelector(".btn-card-action.edit").addEventListener("click", () => {
         openEditModal(item, "maquinaria");
@@ -345,8 +372,22 @@ document.addEventListener("DOMContentLoaded", () => {
           </button>
         </div>
         <div class="machine-card-body">
-          <h4>${item.name}</h4>
+          <div class="machine-title-row">
+            <h4>${item.name}</h4>
+            ${item.longDesc ? `
+              <button class="btn-note-toggle" title="Ver tecnología y funciones">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="note-icon-svg">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                  <polyline points="14 2 14 8 20 8"></polyline>
+                  <line x1="16" y1="13" x2="8" y2="13"></line>
+                  <line x1="16" y1="17" x2="8" y2="17"></line>
+                  <polyline points="10 9 9 9 8 9"></polyline>
+                </svg>
+              </button>
+            ` : ""}
+          </div>
           <p>${item.desc || ""}</p>
+          ${item.longDesc ? `<div class="machine-long-desc">${item.longDesc}</div>` : ""}
         </div>
         <span class="card-status-badge ${item.owned ? "owned" : "unowned"}">
           ${item.owned ? "Tengo" : "No tengo"}
@@ -354,12 +395,23 @@ document.addEventListener("DOMContentLoaded", () => {
       `;
 
       card.addEventListener("click", (e) => {
-        if (e.target.closest(".card-actions-hover")) return;
+        if (e.target.closest(".card-actions-hover") || e.target.closest(".btn-note-toggle")) return;
         item.owned = !item.owned;
         DB.save(state);
         triggerSaveIndicator();
         renderUtensils(q);
       });
+
+      if (item.longDesc) {
+        card.querySelector(".btn-note-toggle").addEventListener("click", (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          const descEl = card.querySelector(".machine-long-desc");
+          const btnEl = card.querySelector(".btn-note-toggle");
+          descEl.classList.toggle("expanded");
+          btnEl.classList.toggle("active");
+        });
+      }
 
       card.querySelector(".btn-card-action.edit").addEventListener("click", () => {
         openEditModal(item, "utensilio");
@@ -476,6 +528,22 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // --- Modal Form Actions ---
+  btnAddItemModal.addEventListener("click", () => {
+    modalTitle.textContent = "Añadir Item";
+    modalEditId.value = "";
+    modalEditType.value = "";
+    groupItemType.style.display = "flex";
+    
+    modalName.value = "";
+    modalDesc.value = "";
+    modalLongDesc.value = "";
+    
+    modalItemType.value = "maquinaria";
+    toggleModalFields("maquinaria");
+    
+    itemModal.classList.add("show");
+  });
+
   modalItemType.addEventListener("change", () => {
     toggleModalFields(modalItemType.value);
   });
@@ -486,11 +554,13 @@ document.addEventListener("DOMContentLoaded", () => {
       modalDesc.placeholder = "Ej: Capacidad 2.5L, hermético...";
       groupStorageCategory.style.display = "flex";
       groupStorageCount.style.display = "flex";
+      groupLongDesc.style.display = "none";
     } else {
       groupDesc.querySelector("label").textContent = "Descripción corta";
       modalDesc.placeholder = "Ej: Para caldos, eléctrica, XL...";
       groupStorageCategory.style.display = "none";
       groupStorageCount.style.display = "none";
+      groupLongDesc.style.display = "flex";
     }
   }
 
@@ -531,6 +601,8 @@ document.addEventListener("DOMContentLoaded", () => {
         if (editType === "almacenamiento") {
           item.category = modalStorageCategory.value;
           item.count = parseInt(modalStorageCount.value) || 0;
+        } else {
+          item.longDesc = modalLongDesc.value.trim();
         }
       }
     } else {
@@ -539,9 +611,9 @@ document.addEventListener("DOMContentLoaded", () => {
       const newId = `item_${Date.now()}`;
       
       if (type === "maquinaria") {
-        state.taller.maquinaria.push({ id: newId, name: name, desc: modalDesc.value.trim(), owned: true });
+        state.taller.maquinaria.push({ id: newId, name: name, desc: modalDesc.value.trim(), longDesc: modalLongDesc.value.trim(), owned: true });
       } else if (type === "utensilio") {
-        state.taller.utensilios.push({ id: newId, name: name, desc: modalDesc.value.trim(), owned: true });
+        state.taller.utensilios.push({ id: newId, name: name, desc: modalDesc.value.trim(), longDesc: modalLongDesc.value.trim(), owned: true });
       } else if (type === "almacenamiento") {
         state.taller.almacenamiento.push({
           id: newId,
@@ -575,6 +647,7 @@ document.addEventListener("DOMContentLoaded", () => {
       modalStorageCount.value = item.count || 0;
       toggleModalFields("almacenamiento");
     } else {
+      modalLongDesc.value = item.longDesc || "";
       toggleModalFields("maquinaria");
     }
     
@@ -1051,11 +1124,21 @@ Basándote en este contexto, por favor genera una propuesta de menú detallada c
 
     const activeMachinery = (data.taller.maquinaria || [])
       .filter(i => i.owned)
-      .map(i => i.name);
+      .map(i => {
+        let details = [];
+        if (i.desc) details.push(i.desc);
+        if (i.longDesc) details.push(i.longDesc);
+        return details.length > 0 ? `${i.name} (${details.join(" - ")})` : i.name;
+      });
 
     const activeUtensils = (data.taller.utensilios || [])
       .filter(i => i.owned)
-      .map(i => i.name);
+      .map(i => {
+        let details = [];
+        if (i.desc) details.push(i.desc);
+        if (i.longDesc) details.push(i.longDesc);
+        return details.length > 0 ? `${i.name} (${details.join(" - ")})` : i.name;
+      });
 
     const storageCategories = {
       grandes: [],
