@@ -705,27 +705,67 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (editId) {
       // EDIT
-      let item = null;
-      if (editType === "maquinaria") {
-        item = state.taller.maquinaria.find(i => i.id === editId);
-      } else if (editType === "utensilio") {
-        item = state.taller.utensilios.find(i => i.id === editId);
-      } else if (editType === "almacenamiento") {
-        item = state.taller.almacenamiento.find(i => i.id === editId);
-      }
-
-      if (item) {
-        item.name = name;
-        item.desc = modalDesc.value.trim();
-        if (editType === "almacenamiento") {
-          item.category = modalStorageCategory.value;
-          item.count = parseInt(modalStorageCount.value) || 0;
-        } else if (editType === "maquinaria") {
-          item.longDesc = modalLongDesc.value.trim();
-          item.category = modalMachineryCategory.value;
+      const newType = modalItemType.value;
+      if (newType !== editType) {
+        let item = null;
+        if (editType === "maquinaria") {
+          const idx = state.taller.maquinaria.findIndex(i => i.id === editId);
+          if (idx !== -1) item = state.taller.maquinaria.splice(idx, 1)[0];
         } else if (editType === "utensilio") {
-          item.longDesc = modalLongDesc.value.trim();
-          item.category = modalUtensilCategory.value;
+          const idx = state.taller.utensilios.findIndex(i => i.id === editId);
+          if (idx !== -1) item = state.taller.utensilios.splice(idx, 1)[0];
+        } else if (editType === "almacenamiento") {
+          const idx = state.taller.almacenamiento.findIndex(i => i.id === editId);
+          if (idx !== -1) item = state.taller.almacenamiento.splice(idx, 1)[0];
+        }
+
+        if (item) {
+          item.name = name;
+          item.desc = modalDesc.value.trim();
+          if (newType === "maquinaria") {
+            item.owned = (item.owned !== undefined) ? item.owned : true;
+            item.longDesc = modalLongDesc.value.trim();
+            item.category = modalMachineryCategory.value;
+            delete item.count;
+            state.taller.maquinaria.push(item);
+          } else if (newType === "utensilio") {
+            item.owned = (item.owned !== undefined) ? item.owned : true;
+            item.longDesc = modalLongDesc.value.trim();
+            item.category = modalUtensilCategory.value;
+            delete item.count;
+            state.taller.utensilios.push(item);
+          } else if (newType === "almacenamiento") {
+            item.category = modalStorageCategory.value;
+            item.count = parseInt(modalStorageCount.value) || 1;
+            delete item.owned;
+            delete item.longDesc;
+            state.taller.almacenamiento.push(item);
+          }
+        }
+      } else {
+        // Simple update in-place
+        let item = null;
+        if (editType === "maquinaria") {
+          item = state.taller.maquinaria.find(i => i.id === editId);
+        } else if (editType === "utensilio") {
+          item = state.taller.utensilios.find(i => i.id === editId);
+        } else if (editType === "almacenamiento") {
+          item = state.taller.almacenamiento.find(i => i.id === editId);
+        }
+
+        if (item) {
+          item.name = name;
+          item.desc = modalDesc.value.trim();
+          if (editType === "almacenamiento") {
+            item.category = modalStorageCategory.value;
+            item.count = parseInt(modalStorageCount.value) || 0;
+          } else if (editType === "maquinaria") {
+            item.longDesc = modalLongDesc.value.trim();
+            item.category = modalMachineryCategory.value;
+          } else if (editType === "utensilio") {
+            item.longDesc = modalLongDesc.value.trim();
+            item.category = modalUtensilCategory.value;
+          }
         }
       }
     } else {
@@ -774,7 +814,8 @@ document.addEventListener("DOMContentLoaded", () => {
     modalTitle.textContent = "Editar Item";
     modalEditId.value = item.id;
     modalEditType.value = type;
-    groupItemType.style.display = "none";
+    groupItemType.style.display = "flex";
+    modalItemType.value = type;
     
     modalName.value = item.name;
     modalDesc.value = item.desc || "";
