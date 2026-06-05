@@ -44,7 +44,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const tallerSearch = document.getElementById("taller-search");
   const btnClearTallerSearch = document.getElementById("btn-clear-taller-search");
   const btnAddItemModal = document.getElementById("btn-add-item-modal");
-  const btnAddItemModalTaller = document.getElementById("btn-add-item-modal-taller");
   const btnAddItemMobileHeader = document.getElementById("btn-add-item-mobile-header");
 
   const MACHINERY_CAT_LABELS = {
@@ -806,7 +805,6 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   if (btnAddItemModal) btnAddItemModal.addEventListener("click", openAddModal);
-  if (btnAddItemModalTaller) btnAddItemModalTaller.addEventListener("click", openAddModal);
   if (btnAddItemMobileHeader) btnAddItemMobileHeader.addEventListener("click", openAddModal);
 
   modalItemType.addEventListener("change", () => {
