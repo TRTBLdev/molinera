@@ -17,20 +17,20 @@ const INITIAL_STATE = {
   },
   taller: {
     maquinaria: [
-      { id: "hornilla", name: "Hornilla de Inducción", desc: "4 zonas activas", owned: false },
-      { id: "airfryer", name: "Airfryer Pro", desc: "Capacidad XL", owned: false },
-      { id: "horno", name: "Horno Convencional", desc: "Hasta 250°C", owned: false },
-      { id: "olla_presion_lenta", name: "Olla de Presión / Lenta", desc: "Eléctrica multiusos", owned: false },
-      { id: "licuadora_alta_potencia", name: "Licuadora Alta Potencia", desc: "Para batidos y salsas", owned: false },
-      { id: "procesador_alimentos", name: "Procesador de Alimentos", desc: "Rallado y picado", owned: false }
+      { id: "hornilla", name: "Hornilla de Inducción", desc: "4 zonas activas", category: "coccion", owned: false },
+      { id: "airfryer", name: "Airfryer Pro", desc: "Capacidad XL", category: "coccion", owned: false },
+      { id: "horno", name: "Horno Convencional", desc: "Hasta 250°C", category: "coccion", owned: false },
+      { id: "olla_presion_lenta", name: "Olla de Presión / Lenta", desc: "Eléctrica multiusos", category: "coccion", owned: false },
+      { id: "licuadora_alta_potencia", name: "Licuadora Alta Potencia", desc: "Para batidos y salsas", category: "procesamiento", owned: false },
+      { id: "procesador_alimentos", name: "Procesador de Alimentos", desc: "Rallado y picado", category: "procesamiento", owned: false }
     ],
     utensilios: [
-      { id: "olla_grande", name: "Olla Grande", desc: "Para caldos y pastas", owned: false },
-      { id: "sarten_antiadherente", name: "Sartén Antiadherente", desc: "Mediana multiusos", owned: false },
-      { id: "tabla_picar", name: "Tabla de Picar", desc: "Madera o plástico", owned: false },
-      { id: "colador", name: "Colador / Pasapuré", desc: "Malla fina de acero", owned: false },
-      { id: "balanza_cocina", name: "Balanza de Cocina", desc: "Precisión en gramos", owned: false },
-      { id: "rallador", name: "Rallador de Queso/Verduras", desc: "Multiusos 4 caras", owned: false }
+      { id: "olla_grande", name: "Olla Grande", desc: "Para caldos y pastas", category: "ollas_sartenes", owned: false },
+      { id: "sarten_antiadherente", name: "Sartén Antiadherente", desc: "Mediana multiusos", category: "ollas_sartenes", owned: false },
+      { id: "tabla_picar", name: "Tabla de Picar", desc: "Madera o plástico", category: "cuchillos_corte", owned: false },
+      { id: "colador", name: "Colador / Pasapuré", desc: "Malla fina de acero", category: "herramientas", owned: false },
+      { id: "balanza_cocina", name: "Balanza de Cocina", desc: "Precisión en gramos", category: "medicion", owned: false },
+      { id: "rallador", name: "Rallador de Queso/Verduras", desc: "Multiusos 4 caras", category: "cuchillos_corte", owned: false }
     ],
     almacenamiento: [
       { id: "vidrio_hermetico", name: "Vidrio Hermético", desc: "Capacidad: 2.5L", category: "grandes", count: 0 },
@@ -67,10 +67,13 @@ const DB = {
         console.log("Migrando base de datos local a versión 1.2.0");
         parsed.version = "1.2.0";
         const upgraded = this._mergeWithDefaults(parsed, INITIAL_STATE);
+        this._migrateCategories(upgraded);
         return this.save(upgraded);
       }
       
-      return this._mergeWithDefaults(parsed, INITIAL_STATE);
+      const merged = this._mergeWithDefaults(parsed, INITIAL_STATE);
+      this._migrateCategories(merged);
+      return merged;
     } catch (e) {
       console.error("Error loading database:", e);
       return INITIAL_STATE;
@@ -117,10 +120,46 @@ const DB = {
       // Enforce 1.2.0 arrays migrations
       parsed.version = "1.2.0";
       const merged = this._mergeWithDefaults(parsed, INITIAL_STATE);
+      this._migrateCategories(merged);
       this.save(merged);
       return { success: true, state: merged };
     } catch (e) {
       return { success: false, error: e.message };
+    }
+  },
+
+  _migrateCategories(state) {
+    if (state && state.taller) {
+      if (state.taller.maquinaria) {
+        const machCats = {
+          hornilla: "coccion",
+          airfryer: "coccion",
+          horno: "coccion",
+          olla_presion_lenta: "coccion",
+          licuadora_alta_potencia: "procesamiento",
+          procesador_alimentos: "procesamiento"
+        };
+        state.taller.maquinaria.forEach(item => {
+          if (!item.category) {
+            item.category = machCats[item.id] || "otros";
+          }
+        });
+      }
+      if (state.taller.utensilios) {
+        const utenCats = {
+          olla_grande: "ollas_sartenes",
+          sarten_antiadherente: "ollas_sartenes",
+          tabla_picar: "cuchillos_corte",
+          colador: "herramientas",
+          balanza_cocina: "medicion",
+          rallador: "cuchillos_corte"
+        };
+        state.taller.utensilios.forEach(item => {
+          if (!item.category) {
+            item.category = utenCats[item.id] || "otros";
+          }
+        });
+      }
     }
   },
 

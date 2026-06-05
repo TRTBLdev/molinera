@@ -40,12 +40,15 @@
     <!-- Mobile Header (Visible only on Mobile) -->
     <header class="mobile-top-header">
       <div class="brand-logo"><span class="logo-text-main">M</span><span class="logo-text-hide">OLINERA</span><span class="dot-accent">.</span></div>
-      <span class="settings-icon" title="Configuración">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="3"></circle>
-          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
-        </svg>
-      </span>
+      <div style="display: flex; align-items: center; gap: 16px;">
+        <button class="btn-add-item mobile-add-btn" id="btn-add-item-mobile-header" style="font-size: 11px !important; padding: 4px 8px; border: 1px solid var(--border-color); font-weight: 700; text-transform: uppercase;">+ Añadir</button>
+        <span class="settings-icon" title="Configuración">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+        </span>
+      </div>
     </header>
 
     <!-- Sidebar Navigation (Desktop & Tablet) -->
@@ -125,24 +128,24 @@
 
           <!-- Machinery Grid -->
           <div class="section-block">
-            <div class="section-header-line collapsible-header static-collapsible"><span>EQUIPO DE COCINA</span></div>
-            <div class="machinery-grid collapsible-content" id="machinery-container">
+            <div class="section-header-line collapsible-header static-collapsible collapsed"><span>EQUIPO DE COCINA</span></div>
+            <div class="machinery-grid collapsible-content collapsed" id="machinery-container">
               <!-- Cards generated dynamically -->
             </div>
           </div>
 
           <!-- Utensils Grid -->
           <div class="section-block">
-            <div class="section-header-line collapsible-header static-collapsible"><span>UTENSILIOS Y MENAJE</span></div>
-            <div class="machinery-grid collapsible-content" id="utensils-container">
+            <div class="section-header-line collapsible-header static-collapsible collapsed"><span>UTENSILIOS Y MENAJE</span></div>
+            <div class="machinery-grid collapsible-content collapsed" id="utensils-container">
               <!-- Cards generated dynamically -->
             </div>
           </div>
 
           <!-- Storage Containers List -->
           <div class="section-block">
-            <div class="section-header-line collapsible-header static-collapsible"><span>ENVASES DE ALMACENAMIENTO</span></div>
-            <div class="storage-lists-container collapsible-content">
+            <div class="section-header-line collapsible-header static-collapsible collapsed"><span>ENVASES DE ALMACENAMIENTO</span></div>
+            <div class="storage-lists-container collapsible-content collapsed">
               
               <!-- Grandes -->
               <div class="storage-category-section">
@@ -182,9 +185,9 @@
 
           <!-- Alacena Maestra Configurator (Move inside Infraestructura) -->
           <div class="section-block">
-            <div class="section-header-line collapsible-header static-collapsible"><span>ALACENA MAESTRA (Biblioteca General)</span></div>
+            <div class="section-header-line collapsible-header static-collapsible collapsed"><span>ALACENA MAESTRA (Biblioteca General)</span></div>
             
-            <div class="section-card collapsible-content">
+            <div class="section-card collapsible-content collapsed">
               <div class="search-and-add">
                 <div class="search-box">
                   <span class="search-icon">🔍</span>
@@ -206,29 +209,6 @@
 
               <div class="master-selection-container" id="master-selection-container">
                 <!-- Dynamic selection lists -->
-              </div>
-            </div>
-          </div>
-
-          <!-- Database backups -->
-          <div class="section-block">
-            <div class="section-header-line collapsible-header static-collapsible"><span>Copia de Seguridad y Respaldos</span></div>
-            <div class="section-card collapsible-content" style="padding: 20px 0;">
-              <div class="data-actions-grid">
-                <button class="btn-data-action download" id="btn-download-json">
-                  <span class="btn-icon">📥</span>
-                  <span class="btn-label">Exportar Base de Datos</span>
-                </button>
-                <label class="btn-data-action upload" id="btn-upload-label">
-                  <span class="btn-icon">📤</span>
-                  <span class="btn-label">Importar Base de Datos</span>
-                  <input type="file" id="input-upload-json" accept=".json" style="display: none;">
-                </label>
-
-                <button class="btn-data-action reset" id="btn-reset-factory">
-                  <span class="btn-icon">⚠️</span>
-                  <span class="btn-label">Reiniciar de Fábrica</span>
-                </button>
               </div>
             </div>
           </div>
@@ -563,6 +543,31 @@
           <textarea id="modal-long-desc" placeholder="Ej: Cuenta con panel digital, 12 velocidades, sistema anti-vibración y calentamiento por inducción rápida..."></textarea>
         </div>
         
+        <!-- For Maquinaria Category -->
+        <div class="form-group" id="group-machinery-category" style="display: none;">
+          <label for="modal-machinery-category">Categoría de Maquinaria</label>
+          <select id="modal-machinery-category">
+            <option value="coccion">Cocción y Calor (Hornos, Airfryers...)</option>
+            <option value="procesamiento">Procesamiento y Licuado (Licuadoras, Picadoras...)</option>
+            <option value="conservacion">Conservación y Frío (Refrigeradores, Enfriadores...)</option>
+            <option value="otros">Otros Equipos (Básculas, Cafeteras...)</option>
+          </select>
+        </div>
+
+        <!-- For Utensilio Category -->
+        <div class="form-group" id="group-utensil-category" style="display: none;">
+          <label for="modal-utensil-category">Categoría de Utensilio</label>
+          <select id="modal-utensil-category">
+            <option value="ollas_sartenes">Ollas y Sartenes</option>
+            <option value="cuchillos_corte">Cuchillos y Corte</option>
+            <option value="herramientas">Herramientas de Cocina (Espátulas, Cucharas, Pinzas...)</option>
+            <option value="medicion">Medición y Precisión (Básculas, Termómetros...)</option>
+            <option value="moldes_reposteria">Moldes y Repostería</option>
+            <option value="servicio_bebidas">Servicio y Bebidas (Jarras, Teteras, Abrebotellas...)</option>
+            <option value="otros">Otros Utensilios</option>
+          </select>
+        </div>
+
         <!-- Only for storage envases -->
         <div class="form-group" id="group-storage-category" style="display: none;">
           <label for="modal-storage-category">Categoría de Capacidad</label>

@@ -41,6 +41,24 @@ document.addEventListener("DOMContentLoaded", () => {
   const topSearch = document.getElementById("top-search");
   const btnAddItemModal = document.getElementById("btn-add-item-modal");
   const btnAddItemModalInfra = document.getElementById("btn-add-item-modal-infra");
+  const btnAddItemMobileHeader = document.getElementById("btn-add-item-mobile-header");
+
+  const MACHINERY_CAT_LABELS = {
+    coccion: "Cocción y Calor",
+    procesamiento: "Procesamiento y Licuado",
+    conservacion: "Conservación y Frío",
+    otros: "Otros Equipos"
+  };
+
+  const UTENSIL_CAT_LABELS = {
+    ollas_sartenes: "Ollas y Sartenes",
+    cuchillos_corte: "Cuchillos y Corte",
+    herramientas: "Herramientas de Cocina",
+    medicion: "Medición y Precisión",
+    moldes_reposteria: "Moldes y Repostería",
+    servicio_bebidas: "Servicio y Bebidas",
+    otros: "Otros Utensilios"
+  };
 
   // Taller List Nodes
   const machineryContainer = document.getElementById("machinery-container");
@@ -103,6 +121,11 @@ document.addEventListener("DOMContentLoaded", () => {
   const modalStorageCategory = document.getElementById("modal-storage-category");
   const groupStorageCount = document.getElementById("group-storage-count");
   const modalStorageCount = document.getElementById("modal-storage-count");
+
+  const groupMachineryCategory = document.getElementById("group-machinery-category");
+  const modalMachineryCategory = document.getElementById("modal-machinery-category");
+  const groupUtensilCategory = document.getElementById("group-utensil-category");
+  const modalUtensilCategory = document.getElementById("modal-utensil-category");
   
   const btnCloseModal = document.getElementById("btn-close-modal");
   const btnCancelModal = document.getElementById("btn-cancel-modal");
@@ -260,6 +283,24 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+  function deleteTallerItem(id, type) {
+    const confirmDelete = confirm("¿Deseas eliminar este elemento del taller?");
+    if (!confirmDelete) return;
+
+    if (type === "maquinaria") {
+      state.taller.maquinaria = state.taller.maquinaria.filter(i => i.id !== id);
+    } else if (type === "utensilio") {
+      state.taller.utensilios = state.taller.utensilios.filter(i => i.id !== id);
+    } else if (type === "almacenamiento") {
+      state.taller.almacenamiento = state.taller.almacenamiento.filter(i => i.id !== id);
+    }
+
+    DB.save(state);
+    triggerSaveIndicator();
+    filterUI(topSearch ? topSearch.value : "");
+    showToast("Elemento eliminado del taller.", "warning");
+  }
+
   // --- El Taller (Flat UI, No Icons) ---
   function renderTaller(q = "") {
     renderMachinery(q);
@@ -272,85 +313,108 @@ document.addEventListener("DOMContentLoaded", () => {
     const list = state.taller.maquinaria || [];
     let matchCount = 0;
 
+    const grouped = {
+      coccion: [],
+      procesamiento: [],
+      conservacion: [],
+      otros: []
+    };
+
     list.forEach(item => {
       if (q && !item.name.toLowerCase().includes(q)) return;
       matchCount++;
-
-      const card = document.createElement("div");
-      card.className = `machine-card ${item.owned ? "owned" : "unowned"}`;
-      card.id = `card-machinery-${item.id}`;
-
-      card.innerHTML = `
-        <div class="card-actions-hover">
-          <button class="btn-card-action edit" title="Editar">
-            <svg class="action-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M12 20h9"></path>
-              <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
-            </svg>
-          </button>
-          <button class="btn-card-action delete" title="Eliminar">
-            <svg class="action-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <polyline points="3 6 5 6 21 6"></polyline>
-              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-            </svg>
-          </button>
-        </div>
-        <div class="machine-card-body">
-          <div class="machine-title-row">
-            <h4>${item.name}</h4>
-            ${item.longDesc ? `
-              <button class="btn-note-toggle" title="Ver tecnología y funciones">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="note-icon-svg">
-                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                  <polyline points="14 2 14 8 20 8"></polyline>
-                  <line x1="16" y1="13" x2="8" y2="13"></line>
-                  <line x1="16" y1="17" x2="8" y2="17"></line>
-                  <polyline points="10 9 9 9 8 9"></polyline>
-                </svg>
-              </button>
-            ` : ""}
-          </div>
-          <p>${item.desc || ""}</p>
-          ${item.longDesc ? `<div class="machine-long-desc">${item.longDesc}</div>` : ""}
-        </div>
-        <span class="card-status-badge ${item.owned ? "owned" : "unowned"}">
-          ${item.owned ? "Tengo" : "No tengo"}
-        </span>
-      `;
-
-      card.addEventListener("click", (e) => {
-        if (e.target.closest(".card-actions-hover") || e.target.closest(".btn-note-toggle")) return;
-        item.owned = !item.owned;
-        DB.save(state);
-        triggerSaveIndicator();
-        renderMachinery(q);
-      });
-
-      if (item.longDesc) {
-        card.querySelector(".btn-note-toggle").addEventListener("click", (e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          const descEl = card.querySelector(".machine-long-desc");
-          const btnEl = card.querySelector(".btn-note-toggle");
-          descEl.classList.toggle("expanded");
-          btnEl.classList.toggle("active");
-        });
-      }
-
-      card.querySelector(".btn-card-action.edit").addEventListener("click", () => {
-        openEditModal(item, "maquinaria");
-      });
-
-      card.querySelector(".btn-card-action.delete").addEventListener("click", () => {
-        deleteTallerItem(item.id, "maquinaria");
-      });
-
-      machineryContainer.appendChild(card);
+      const cat = item.category || "otros";
+      if (!grouped[cat]) grouped[cat] = [];
+      grouped[cat].push(item);
     });
 
     if (matchCount === 0) {
       machineryContainer.innerHTML = `<div style="grid-column: 1/-1; padding: 12px; color: var(--color-text-muted); font-size:12px;">Ningún equipo coincide.</div>`;
+      return;
     }
+
+    Object.keys(MACHINERY_CAT_LABELS).forEach(catKey => {
+      const items = grouped[catKey] || [];
+      if (items.length === 0) return;
+
+      const subHeader = document.createElement("div");
+      subHeader.className = "taller-sub-header";
+      subHeader.textContent = MACHINERY_CAT_LABELS[catKey];
+      machineryContainer.appendChild(subHeader);
+
+      items.forEach(item => {
+        const card = document.createElement("div");
+        card.className = `machine-card ${item.owned ? "owned" : "unowned"}`;
+        card.id = `card-machinery-${item.id}`;
+
+        card.innerHTML = `
+          <div class="card-actions-hover">
+            <button class="btn-card-action edit" title="Editar">
+              <svg class="action-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 20h9"></path>
+                <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+              </svg>
+            </button>
+            <button class="btn-card-action delete" title="Eliminar">
+              <svg class="action-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="3 6 5 6 21 6"></polyline>
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+              </svg>
+            </button>
+          </div>
+          <div class="machine-card-body">
+            <div class="machine-title-row">
+              <h4>${item.name}</h4>
+              ${item.longDesc ? `
+                <button class="btn-note-toggle" title="Ver tecnología y funciones">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="note-icon-svg">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <polyline points="14 2 14 8 20 8"></polyline>
+                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                    <polyline points="10 9 9 9 8 9"></polyline>
+                  </svg>
+                </button>
+              ` : ""}
+            </div>
+            <p>${item.desc || ""}</p>
+            ${item.longDesc ? `<div class="machine-long-desc">${item.longDesc}</div>` : ""}
+          </div>
+          <span class="card-status-badge ${item.owned ? "owned" : "unowned"}">
+            ${item.owned ? "Tengo" : "No tengo"}
+          </span>
+        `;
+
+        card.addEventListener("click", (e) => {
+          if (e.target.closest(".card-actions-hover") || e.target.closest(".btn-note-toggle")) return;
+          item.owned = !item.owned;
+          DB.save(state);
+          triggerSaveIndicator();
+          renderMachinery(q);
+        });
+
+        if (item.longDesc) {
+          card.querySelector(".btn-note-toggle").addEventListener("click", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            const descEl = card.querySelector(".machine-long-desc");
+            const btnEl = card.querySelector(".btn-note-toggle");
+            descEl.classList.toggle("expanded");
+            btnEl.classList.toggle("active");
+          });
+        }
+
+        card.querySelector(".btn-card-action.edit").addEventListener("click", () => {
+          openEditModal(item, "maquinaria");
+        });
+
+        card.querySelector(".btn-card-action.delete").addEventListener("click", () => {
+          deleteTallerItem(item.id, "maquinaria");
+        });
+
+        machineryContainer.appendChild(card);
+      });
+    });
   }
 
   function renderUtensils(q = "") {
@@ -358,85 +422,111 @@ document.addEventListener("DOMContentLoaded", () => {
     const list = state.taller.utensilios || [];
     let matchCount = 0;
 
+    const grouped = {
+      ollas_sartenes: [],
+      cuchillos_corte: [],
+      herramientas: [],
+      medicion: [],
+      moldes_reposteria: [],
+      servicio_bebidas: [],
+      otros: []
+    };
+
     list.forEach(item => {
       if (q && !item.name.toLowerCase().includes(q)) return;
       matchCount++;
-
-      const card = document.createElement("div");
-      card.className = `machine-card ${item.owned ? "owned" : "unowned"}`;
-      card.id = `card-utensil-${item.id}`;
-
-      card.innerHTML = `
-        <div class="card-actions-hover">
-          <button class="btn-card-action edit" title="Editar">
-            <svg class="action-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M12 20h9"></path>
-              <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
-            </svg>
-          </button>
-          <button class="btn-card-action delete" title="Eliminar">
-            <svg class="action-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <polyline points="3 6 5 6 21 6"></polyline>
-              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-            </svg>
-          </button>
-        </div>
-        <div class="machine-card-body">
-          <div class="machine-title-row">
-            <h4>${item.name}</h4>
-            ${item.longDesc ? `
-              <button class="btn-note-toggle" title="Ver tecnología y funciones">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="note-icon-svg">
-                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                  <polyline points="14 2 14 8 20 8"></polyline>
-                  <line x1="16" y1="13" x2="8" y2="13"></line>
-                  <line x1="16" y1="17" x2="8" y2="17"></line>
-                  <polyline points="10 9 9 9 8 9"></polyline>
-                </svg>
-              </button>
-            ` : ""}
-          </div>
-          <p>${item.desc || ""}</p>
-          ${item.longDesc ? `<div class="machine-long-desc">${item.longDesc}</div>` : ""}
-        </div>
-        <span class="card-status-badge ${item.owned ? "owned" : "unowned"}">
-          ${item.owned ? "Tengo" : "No tengo"}
-        </span>
-      `;
-
-      card.addEventListener("click", (e) => {
-        if (e.target.closest(".card-actions-hover") || e.target.closest(".btn-note-toggle")) return;
-        item.owned = !item.owned;
-        DB.save(state);
-        triggerSaveIndicator();
-        renderUtensils(q);
-      });
-
-      if (item.longDesc) {
-        card.querySelector(".btn-note-toggle").addEventListener("click", (e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          const descEl = card.querySelector(".machine-long-desc");
-          const btnEl = card.querySelector(".btn-note-toggle");
-          descEl.classList.toggle("expanded");
-          btnEl.classList.toggle("active");
-        });
-      }
-
-      card.querySelector(".btn-card-action.edit").addEventListener("click", () => {
-        openEditModal(item, "utensilio");
-      });
-
-      card.querySelector(".btn-card-action.delete").addEventListener("click", () => {
-        deleteTallerItem(item.id, "utensilio");
-      });
-
-      utensilsContainer.appendChild(card);
+      const cat = item.category || "otros";
+      if (!grouped[cat]) grouped[cat] = [];
+      grouped[cat].push(item);
     });
 
     if (matchCount === 0) {
       utensilsContainer.innerHTML = `<div style="grid-column: 1/-1; padding: 12px; color: var(--color-text-muted); font-size:12px;">Ningún utensilio coincide.</div>`;
+      return;
     }
+
+    Object.keys(UTENSIL_CAT_LABELS).forEach(catKey => {
+      const items = grouped[catKey] || [];
+      if (items.length === 0) return;
+
+      const subHeader = document.createElement("div");
+      subHeader.className = "taller-sub-header";
+      subHeader.textContent = UTENSIL_CAT_LABELS[catKey];
+      utensilsContainer.appendChild(subHeader);
+
+      items.forEach(item => {
+        const card = document.createElement("div");
+        card.className = `machine-card ${item.owned ? "owned" : "unowned"}`;
+        card.id = `card-utensil-${item.id}`;
+
+        card.innerHTML = `
+          <div class="card-actions-hover">
+            <button class="btn-card-action edit" title="Editar">
+              <svg class="action-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 20h9"></path>
+                <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+              </svg>
+            </button>
+            <button class="btn-card-action delete" title="Eliminar">
+              <svg class="action-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="3 6 5 6 21 6"></polyline>
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+              </svg>
+            </button>
+          </div>
+          <div class="machine-card-body">
+            <div class="machine-title-row">
+              <h4>${item.name}</h4>
+              ${item.longDesc ? `
+                <button class="btn-note-toggle" title="Ver tecnología y funciones">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="note-icon-svg">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <polyline points="14 2 14 8 20 8"></polyline>
+                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                    <polyline points="10 9 9 9 8 9"></polyline>
+                  </svg>
+                </button>
+              ` : ""}
+            </div>
+            <p>${item.desc || ""}</p>
+            ${item.longDesc ? `<div class="machine-long-desc">${item.longDesc}</div>` : ""}
+          </div>
+          <span class="card-status-badge ${item.owned ? "owned" : "unowned"}">
+            ${item.owned ? "Tengo" : "No tengo"}
+          </span>
+        `;
+
+        card.addEventListener("click", (e) => {
+          if (e.target.closest(".card-actions-hover") || e.target.closest(".btn-note-toggle")) return;
+          item.owned = !item.owned;
+          DB.save(state);
+          triggerSaveIndicator();
+          renderUtensils(q);
+        });
+
+        if (item.longDesc) {
+          card.querySelector(".btn-note-toggle").addEventListener("click", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            const descEl = card.querySelector(".machine-long-desc");
+            const btnEl = card.querySelector(".btn-note-toggle");
+            descEl.classList.toggle("expanded");
+            btnEl.classList.toggle("active");
+          });
+        }
+
+        card.querySelector(".btn-card-action.edit").addEventListener("click", () => {
+          openEditModal(item, "utensilio");
+        });
+
+        card.querySelector(".btn-card-action.delete").addEventListener("click", () => {
+          deleteTallerItem(item.id, "utensilio");
+        });
+
+        utensilsContainer.appendChild(card);
+      });
+    });
   }
 
   function renderStorage(q = "") {
@@ -551,11 +641,15 @@ document.addEventListener("DOMContentLoaded", () => {
     modalItemType.value = "maquinaria";
     toggleModalFields("maquinaria");
     
+    if (modalMachineryCategory) modalMachineryCategory.value = "coccion";
+    if (modalUtensilCategory) modalUtensilCategory.value = "ollas_sartenes";
+    
     itemModal.classList.add("show");
   }
 
   if (btnAddItemModal) btnAddItemModal.addEventListener("click", openAddModal);
   if (btnAddItemModalInfra) btnAddItemModalInfra.addEventListener("click", openAddModal);
+  if (btnAddItemMobileHeader) btnAddItemMobileHeader.addEventListener("click", openAddModal);
 
   modalItemType.addEventListener("change", () => {
     toggleModalFields(modalItemType.value);
@@ -568,12 +662,24 @@ document.addEventListener("DOMContentLoaded", () => {
       groupStorageCategory.style.display = "flex";
       groupStorageCount.style.display = "flex";
       groupLongDesc.style.display = "none";
-    } else {
+      if (groupMachineryCategory) groupMachineryCategory.style.display = "none";
+      if (groupUtensilCategory) groupUtensilCategory.style.display = "none";
+    } else if (type === "maquinaria") {
       groupDesc.querySelector("label").textContent = "Descripción corta";
       modalDesc.placeholder = "Ej: Para caldos, eléctrica, XL...";
       groupStorageCategory.style.display = "none";
       groupStorageCount.style.display = "none";
       groupLongDesc.style.display = "flex";
+      if (groupMachineryCategory) groupMachineryCategory.style.display = "flex";
+      if (groupUtensilCategory) groupUtensilCategory.style.display = "none";
+    } else if (type === "utensilio") {
+      groupDesc.querySelector("label").textContent = "Descripción corta";
+      modalDesc.placeholder = "Ej: Sartén de teflón, acero inoxidable...";
+      groupStorageCategory.style.display = "none";
+      groupStorageCount.style.display = "none";
+      groupLongDesc.style.display = "flex";
+      if (groupMachineryCategory) groupMachineryCategory.style.display = "none";
+      if (groupUtensilCategory) groupUtensilCategory.style.display = "flex";
     }
   }
 
@@ -614,8 +720,12 @@ document.addEventListener("DOMContentLoaded", () => {
         if (editType === "almacenamiento") {
           item.category = modalStorageCategory.value;
           item.count = parseInt(modalStorageCount.value) || 0;
-        } else {
+        } else if (editType === "maquinaria") {
           item.longDesc = modalLongDesc.value.trim();
+          item.category = modalMachineryCategory.value;
+        } else if (editType === "utensilio") {
+          item.longDesc = modalLongDesc.value.trim();
+          item.category = modalUtensilCategory.value;
         }
       }
     } else {
@@ -624,9 +734,23 @@ document.addEventListener("DOMContentLoaded", () => {
       const newId = `item_${Date.now()}`;
       
       if (type === "maquinaria") {
-        state.taller.maquinaria.push({ id: newId, name: name, desc: modalDesc.value.trim(), longDesc: modalLongDesc.value.trim(), owned: true });
+        state.taller.maquinaria.push({
+          id: newId,
+          name: name,
+          desc: modalDesc.value.trim(),
+          longDesc: modalLongDesc.value.trim(),
+          category: modalMachineryCategory.value,
+          owned: true
+        });
       } else if (type === "utensilio") {
-        state.taller.utensilios.push({ id: newId, name: name, desc: modalDesc.value.trim(), longDesc: modalLongDesc.value.trim(), owned: true });
+        state.taller.utensilios.push({
+          id: newId,
+          name: name,
+          desc: modalDesc.value.trim(),
+          longDesc: modalLongDesc.value.trim(),
+          category: modalUtensilCategory.value,
+          owned: true
+        });
       } else if (type === "almacenamiento") {
         state.taller.almacenamiento.push({
           id: newId,
@@ -659,9 +783,14 @@ document.addEventListener("DOMContentLoaded", () => {
       modalStorageCategory.value = item.category || "grandes";
       modalStorageCount.value = item.count || 0;
       toggleModalFields("almacenamiento");
-    } else {
+    } else if (type === "maquinaria") {
       modalLongDesc.value = item.longDesc || "";
+      modalMachineryCategory.value = item.category || "otros";
       toggleModalFields("maquinaria");
+    } else if (type === "utensilio") {
+      modalLongDesc.value = item.longDesc || "";
+      modalUtensilCategory.value = item.category || "otros";
+      toggleModalFields("utensilio");
     }
     
     itemModal.classList.add("show");
@@ -1248,7 +1377,7 @@ ${data.ejecucion.rescate_perecederos.trim() ? `> ${data.ejecucion.rescate_perece
     DB.exportToFile(state);
     showToast("Respaldo de base de datos descargado.", "success");
   }
-  btnDownloadJson.addEventListener("click", triggerBackupDownload);
+  if (btnDownloadJson) btnDownloadJson.addEventListener("click", triggerBackupDownload);
   if (btnSettingsDownload) btnSettingsDownload.addEventListener("click", triggerBackupDownload);
 
   function handleBackupImport(file) {
@@ -1275,10 +1404,12 @@ ${data.ejecucion.rescate_perecederos.trim() ? `> ${data.ejecucion.rescate_perece
     reader.readAsText(file);
   }
 
-  inputUploadJson.addEventListener("change", (e) => {
-    handleBackupImport(e.target.files[0]);
-    inputUploadJson.value = "";
-  });
+  if (inputUploadJson) {
+    inputUploadJson.addEventListener("change", (e) => {
+      handleBackupImport(e.target.files[0]);
+      inputUploadJson.value = "";
+    });
+  }
   if (inputSettingsUploadJson) {
     inputSettingsUploadJson.addEventListener("change", (e) => {
       handleBackupImport(e.target.files[0]);
@@ -1296,7 +1427,7 @@ ${data.ejecucion.rescate_perecederos.trim() ? `> ${data.ejecucion.rescate_perece
       setTimeout(() => location.reload(), 1000);
     }
   }
-  btnResetFactory.addEventListener("click", triggerFactoryReset);
+  if (btnResetFactory) btnResetFactory.addEventListener("click", triggerFactoryReset);
   if (btnSettingsReset) btnSettingsReset.addEventListener("click", triggerFactoryReset);
 
   // Settings Modal controls
