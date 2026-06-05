@@ -2009,3 +2009,31 @@ textarea:focus {
   letter-spacing: 0.5px;
   width: 100%;
 }
+
+/* --- Ingredientes Prioritarios (Fijados) y Filtro --- */
+.btn-pin-priority {
+  color: var(--color-text-muted);
+  transition: all var(--transition-fast);
+}
+
+.btn-pin-priority.active,
+.btn-pin-priority:hover {
+  opacity: 1 !important;
+  color: #ff5500 !important; /* Orange accent for pinned items */
+}
+
+/* Pantry Card when indispensable */
+.pantry-item-card.indispensable .pantry-item-name {
+  font-weight: 700;
+}
+
+/* Botón de Filtro de Prioritarios */
+.btn-filter-priority.active {
+  background-color: var(--color-dark) !important;
+  color: var(--bg-app) !important;
+  border-color: var(--color-dark) !important;
+}
+
+.btn-filter-priority:hover {
+  border-color: var(--color-dark) !important;
+}

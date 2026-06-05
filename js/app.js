@@ -17,6 +17,9 @@ document.addEventListener("DOMContentLoaded", () => {
   if (!state.despensa_viva.custom_categories) {
     state.despensa_viva.custom_categories = {};
   }
+  if (!state.despensa_viva.indispensables) {
+    state.despensa_viva.indispensables = [];
+  }
   
   // Ensure profile schema nodes exist
   if (!state.perfil_raiz) {
@@ -38,9 +41,10 @@ document.addEventListener("DOMContentLoaded", () => {
   // --- Tab Navigation Sync ---
   const tabButtons = document.querySelectorAll(".nav-btn");
   const tabPanels = document.querySelectorAll(".tab-panel");
-  const topSearch = document.getElementById("top-search");
+  const tallerSearch = document.getElementById("taller-search");
+  const btnClearTallerSearch = document.getElementById("btn-clear-taller-search");
   const btnAddItemModal = document.getElementById("btn-add-item-modal");
-  const btnAddItemModalInfra = document.getElementById("btn-add-item-modal-infra");
+  const btnAddItemModalTaller = document.getElementById("btn-add-item-modal-taller");
   const btnAddItemMobileHeader = document.getElementById("btn-add-item-mobile-header");
 
   const MACHINERY_CAT_LABELS = {
@@ -127,6 +131,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const groupUtensilCategory = document.getElementById("group-utensil-category");
   const modalUtensilCategory = document.getElementById("modal-utensil-category");
   
+  const modalTypeChangeWarning = document.getElementById("modal-type-change-warning");
   const btnCloseModal = document.getElementById("btn-close-modal");
   const btnCancelModal = document.getElementById("btn-cancel-modal");
   const btnSaveModal = document.getElementById("btn-save-modal");
@@ -141,18 +146,35 @@ document.addEventListener("DOMContentLoaded", () => {
   const btnSettingsReset = document.getElementById("btn-settings-reset");
 
   // Active Tab state helper
-  let activeTab = "infraestructura";
+  let activeTab = "taller";
+  let filterOnlyPriority = false;
+  const PIN_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon-pin-svg" style="width:12px; height:12px; display:inline-block; vertical-align:middle;"><line x1="12" y1="17" x2="12" y2="22"></line><path d="M5 17h14v-1.76a2 2 0 0 0-.44-1.24l-2.78-3.5A2 2 0 0 1 15 9.26V5a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v4.26a2 2 0 0 1-.78 1.54l-2.78 3.5A2 2 0 0 0 5 15.24z"></path></svg>`;
+  const CATEGORY_ICONS = {
+    proteinas: `<svg class="category-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px; height:14px; display:inline-block; vertical-align:middle; margin-right:8px;"><path d="M12 2c-3 0-6 2-6 6 0 3.3 2.7 6 6 6s6-2.7 6-6c0-4-3-6-6-6z"></path><path d="M12 14v6"></path><circle cx="10" cy="21" r="1.5"></circle><circle cx="14" cy="21" r="1.5"></circle></svg>`,
+    carbohidratos: `<svg class="category-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px; height:14px; display:inline-block; vertical-align:middle; margin-right:8px;"><path d="M12 2v20M12 6c-1.5-1.5-3-1-3-1s.5 2 3 2M12 10c1.5-1.5 3-1 3-1s-.5 2-3 2M12 14c-1.5-1.5-3-1-3-1s.5 2 3 2M12 18c1.5-1.5 3-1 3-1s-.5 2-3 2"></path></svg>`,
+    grasas: `<svg class="category-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px; height:14px; display:inline-block; vertical-align:middle; margin-right:8px;"><path d="M12 2s8 6 8 12a8 8 0 0 1-16 0c0-6 8-12 8-12z"></path></svg>`,
+    vegetales: `<svg class="category-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px; height:14px; display:inline-block; vertical-align:middle; margin-right:8px;"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 3.5 0 8.5C17 15 15 20 11 20z"></path><path d="M19 2c-2.26 4.33-5.27 7.14-8 10"></path></svg>`,
+    despensa: `<svg class="category-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px; height:14px; display:inline-block; vertical-align:middle; margin-right:8px;"><rect x="5" y="6" width="14" height="14" rx="2"></rect><line x1="9" y1="2" x2="15" y2="2"></line><line x1="5" y1="10" x2="19" y2="10"></line></svg>`,
+    condimentos: `<svg class="category-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px; height:14px; display:inline-block; vertical-align:middle; margin-right:8px;"><path d="M6 3h12v4H6zM19 7v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V7M9 11h6M9 15h6M9 19h6"></path></svg>`
+  };
   let compiledPromptTextWithJson = ""; // Stores compiled clipboard string
 
   // --- Access Control Logic ---
-  const CREATOR_CODE = "Molinera-Creator-Admin-2026!";
-  const GUEST_CODE = "Molinera-Guest-Access-2026?";
+  const CREATOR_HASH = "240e667d47b2b74fcd511ba6ac2377a9e2866361ec237e1e750839a075b3c2de";
+  const GUEST_HASH = "c5983768c9d5c194858cd297e1ba94eca77bb18be274fdc2f5f675ac057fdc4c";
 
   const accessContainer = document.getElementById("access-container");
   const appWrapper = document.querySelector(".app-wrapper");
   const inputAccessCode = document.getElementById("input-access-code");
   const btnSubmitAccess = document.getElementById("btn-submit-access");
   const accessErrorMsg = document.getElementById("access-error-msg");
+
+  async function sha256(message) {
+    const msgBuffer = new TextEncoder().encode(message);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  }
 
   function checkAccess() {
     if (state.access_code_validated) {
@@ -171,15 +193,16 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  function validateCode() {
+  async function validateCode() {
     const enteredCode = inputAccessCode ? inputAccessCode.value.trim() : "";
-    if (enteredCode === CREATOR_CODE) {
+    const hash = await sha256(enteredCode);
+    if (hash === CREATOR_HASH) {
       state.access_role = "creadora";
       state.access_code_validated = true;
       DB.save(state);
       checkAccess();
       showToast("Acceso de Creadora verificado.", "success");
-    } else if (enteredCode === GUEST_CODE) {
+    } else if (hash === GUEST_HASH) {
       state.access_role = "invitado";
       state.access_code_validated = true;
       DB.save(state);
@@ -218,18 +241,88 @@ document.addEventListener("DOMContentLoaded", () => {
     const toast = document.createElement("div");
     toast.className = `toast ${type}`;
     
-    let icon = "■";
-    if (type === "success") icon = "✓";
-    if (type === "error") icon = "✕";
-    if (type === "warning") icon = "⚠";
+    let iconSvg = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="width:10px; height:10px; display:inline-block; vertical-align:middle;"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>`;
+    if (type === "success") {
+      iconSvg = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="width:10px; height:10px; display:inline-block; vertical-align:middle;"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
+    } else if (type === "warning") {
+      iconSvg = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="width:10px; height:10px; display:inline-block; vertical-align:middle;"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><circle cx="12" cy="17" r="0.01"></circle></svg>`;
+    }
     
-    toast.innerHTML = `<span style="font-weight:bold; background:var(--color-accent); color:var(--color-dark); padding:0 4px; font-size:10px;">${icon}</span> <span>${message}</span>`;
+    toast.innerHTML = `<span style="display:inline-flex; align-items:center; justify-content:center; background:var(--color-accent); color:var(--color-dark); width:18px; height:18px; border-radius:0;">${iconSvg}</span> <span style="vertical-align:middle; margin-left:8px;">${message}</span>`;
     container.appendChild(toast);
     
     setTimeout(() => {
       toast.classList.add("fade-out");
       toast.addEventListener("animationend", () => toast.remove());
     }, 2800);
+  }
+
+  function showConfirm({ title, message, isPrompt = false, defaultValue = "", confirmText = "Confirmar", cancelText = "Cancelar", isDestructive = false }) {
+    return new Promise((resolve) => {
+      const modal = document.getElementById("confirm-modal");
+      const titleEl = document.getElementById("confirm-title");
+      const messageEl = document.getElementById("confirm-message");
+      const promptContainer = document.getElementById("confirm-prompt-container");
+      const promptInput = document.getElementById("confirm-prompt-input");
+      const btnCancel = document.getElementById("btn-cancel-confirm");
+      const btnSave = document.getElementById("btn-save-confirm");
+      const btnClose = document.getElementById("btn-close-confirm");
+
+      if (!modal) {
+        resolve(isPrompt ? prompt(message, defaultValue) : confirm(message));
+        return;
+      }
+
+      titleEl.textContent = title || "Confirmación";
+      messageEl.textContent = message || "";
+      btnSave.textContent = confirmText;
+      btnCancel.textContent = cancelText;
+
+      if (isDestructive) {
+        btnSave.style.backgroundColor = "#ea580c";
+        btnSave.style.color = "#ffffff";
+      } else {
+        btnSave.style.backgroundColor = "var(--color-accent)";
+        btnSave.style.color = "var(--color-dark)";
+      }
+
+      if (isPrompt) {
+        promptContainer.style.display = "block";
+        promptInput.value = defaultValue;
+        setTimeout(() => promptInput.focus(), 50);
+      } else {
+        promptContainer.style.display = "none";
+      }
+
+      const onSave = () => {
+        const val = isPrompt ? promptInput.value.trim() : true;
+        close(val);
+      };
+
+      const onCancel = () => {
+        close(null);
+      };
+
+      const close = (value) => {
+        modal.classList.remove("show");
+        btnSave.removeEventListener("click", onSave);
+        btnCancel.removeEventListener("click", onCancel);
+        btnClose.removeEventListener("click", onCancel);
+        modal.removeEventListener("click", onBackdrop);
+        resolve(value);
+      };
+
+      const onBackdrop = (e) => {
+        if (e.target === modal) onCancel();
+      };
+
+      btnSave.addEventListener("click", onSave);
+      btnCancel.addEventListener("click", onCancel);
+      btnClose.addEventListener("click", onCancel);
+      modal.addEventListener("click", onBackdrop);
+
+      modal.classList.add("show");
+    });
   }
 
   function triggerSaveIndicator() {
@@ -254,12 +347,15 @@ document.addEventListener("DOMContentLoaded", () => {
       tabPanels.forEach(p => p.classList.remove("active"));
       document.getElementById(`panel-${tabId}`).classList.add("active");
       
-      // Update Top Search bar placeholder
-      if (tabId === "infraestructura") topSearch.placeholder = "Buscar equipo, utensilio, envase o básico...";
-      else if (tabId === "despensa") topSearch.placeholder = "Buscar ingrediente en despensa...";
-      else topSearch.placeholder = "Buscar...";
-      
-      topSearch.value = "";
+      // Reset searches on tab toggle
+      if (tallerSearch) {
+        tallerSearch.value = "";
+        if (btnClearTallerSearch) btnClearTallerSearch.style.display = "none";
+      }
+      if (pantrySearch) {
+        pantrySearch.value = "";
+        if (btnClearPantrySearch) btnClearPantrySearch.style.display = "none";
+      }
       filterUI();
 
       if (tabId === "molino") {
@@ -268,23 +364,84 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  // --- Top Search Filter ---
-  topSearch.addEventListener("input", (e) => {
-    const q = e.target.value.toLowerCase();
-    filterUI(q);
-  });
+  // --- Taller Search Filter ---
+  if (tallerSearch) {
+    tallerSearch.addEventListener("input", (e) => {
+      const q = e.target.value.toLowerCase();
+      if (btnClearTallerSearch) {
+        btnClearTallerSearch.style.display = q ? "block" : "none";
+      }
+      filterUI();
+    });
+  }
 
-  function filterUI(q = "") {
-    if (activeTab === "infraestructura") {
+  if (btnClearTallerSearch) {
+    btnClearTallerSearch.addEventListener("click", () => {
+      if (tallerSearch) {
+        tallerSearch.value = "";
+        btnClearTallerSearch.style.display = "none";
+        filterUI();
+      }
+    });
+  }
+
+  const btnFilterPriority = document.getElementById("btn-filter-priority");
+  if (btnFilterPriority) {
+    btnFilterPriority.addEventListener("click", () => {
+      filterOnlyPriority = !filterOnlyPriority;
+      btnFilterPriority.classList.toggle("active", filterOnlyPriority);
+      if (filterOnlyPriority) {
+        btnFilterPriority.style.backgroundColor = "var(--color-dark)";
+        btnFilterPriority.style.color = "var(--bg-app)";
+      } else {
+        btnFilterPriority.style.backgroundColor = "transparent";
+        btnFilterPriority.style.color = "var(--color-dark)";
+      }
+      filterUI();
+    });
+  }
+
+  const pantrySearch = document.getElementById("pantry-search");
+  const btnClearPantrySearch = document.getElementById("btn-clear-pantry-search");
+
+  if (pantrySearch) {
+    pantrySearch.addEventListener("input", (e) => {
+      const q = e.target.value.toLowerCase();
+      if (btnClearPantrySearch) {
+        btnClearPantrySearch.style.display = q ? "block" : "none";
+      }
+      filterUI();
+    });
+  }
+
+  if (btnClearPantrySearch) {
+    btnClearPantrySearch.addEventListener("click", () => {
+      if (pantrySearch) {
+        pantrySearch.value = "";
+        btnClearPantrySearch.style.display = "none";
+        filterUI();
+      }
+    });
+  }
+
+  function filterUI() {
+    if (activeTab === "taller") {
+      const q = tallerSearch ? tallerSearch.value.toLowerCase() : "";
       renderTaller(q);
-      renderMasterAlacena(q);
     } else if (activeTab === "despensa") {
+      const q = pantrySearch ? pantrySearch.value.toLowerCase() : "";
       renderPantry(q);
+      renderMasterAlacena(q);
     }
   }
 
-  function deleteTallerItem(id, type) {
-    const confirmDelete = confirm("¿Deseas eliminar este elemento del taller?");
+  async function deleteTallerItem(id, type) {
+    const confirmDelete = await showConfirm({
+      title: "Eliminar Elemento",
+      message: "¿Deseas eliminar este elemento del taller?",
+      isDestructive: true,
+      confirmText: "Eliminar"
+    });
     if (!confirmDelete) return;
 
     if (type === "maquinaria") {
@@ -297,7 +454,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     DB.save(state);
     triggerSaveIndicator();
-    filterUI(topSearch ? topSearch.value : "");
+    filterUI();
     showToast("Elemento eliminado del taller.", "warning");
   }
 
@@ -633,6 +790,7 @@ document.addEventListener("DOMContentLoaded", () => {
     modalEditId.value = "";
     modalEditType.value = "";
     groupItemType.style.display = "flex";
+    if (modalTypeChangeWarning) modalTypeChangeWarning.style.display = "none";
     
     modalName.value = "";
     modalDesc.value = "";
@@ -648,11 +806,28 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   if (btnAddItemModal) btnAddItemModal.addEventListener("click", openAddModal);
-  if (btnAddItemModalInfra) btnAddItemModalInfra.addEventListener("click", openAddModal);
+  if (btnAddItemModalTaller) btnAddItemModalTaller.addEventListener("click", openAddModal);
   if (btnAddItemMobileHeader) btnAddItemMobileHeader.addEventListener("click", openAddModal);
 
   modalItemType.addEventListener("change", () => {
-    toggleModalFields(modalItemType.value);
+    const val = modalItemType.value;
+    toggleModalFields(val);
+    
+    const editId = modalEditId.value;
+    const origType = modalEditType.value;
+    if (editId && origType && val !== origType) {
+      const typeLabels = {
+        maquinaria: "Equipo / Maquinaria",
+        utensilio: "Utensilio / Menaje",
+        almacenamiento: "Envase de Almacenamiento"
+      };
+      if (modalTypeChangeWarning) {
+        modalTypeChangeWarning.textContent = `Atención: Al guardar, este elemento se moverá de [${typeLabels[origType]}] a [${typeLabels[val]}].`;
+        modalTypeChangeWarning.style.display = "block";
+      }
+    } else {
+      if (modalTypeChangeWarning) modalTypeChangeWarning.style.display = "none";
+    }
   });
 
   function toggleModalFields(type) {
@@ -805,7 +980,7 @@ document.addEventListener("DOMContentLoaded", () => {
     DB.save(state);
     triggerSaveIndicator();
     closeModal();
-    filterUI(topSearch.value);
+    filterUI();
     showToast("Guardado correctamente.", "success");
   });
 
@@ -816,6 +991,7 @@ document.addEventListener("DOMContentLoaded", () => {
     modalEditType.value = type;
     groupItemType.style.display = "flex";
     modalItemType.value = type;
+    if (modalTypeChangeWarning) modalTypeChangeWarning.style.display = "none";
     
     modalName.value = item.name;
     modalDesc.value = item.desc || "";
@@ -870,8 +1046,11 @@ document.addEventListener("DOMContentLoaded", () => {
       const catCard = document.createElement("div");
       catCard.className = "master-category-card";
       
+      const icon = CATEGORY_ICONS[catKey] || "";
       catCard.innerHTML = `
-        <div class="master-category-title collapsible-header">${CATEGORY_LABELS[catKey]}</div>
+        <div class="master-category-title collapsible-header" style="display:flex; align-items:center;">
+          ${icon}<span>${CATEGORY_LABELS[catKey]}</span>
+        </div>
         <div class="master-items-grid collapsible-content" id="master-grid-cat-${catKey}"></div>
       `;
       
@@ -887,12 +1066,17 @@ document.addEventListener("DOMContentLoaded", () => {
         const isChecked = activeSet.has(name);
         const level = pantryLevels[name] || "optimo";
         
+        const isIndispensable = state.despensa_viva.indispensables && state.despensa_viva.indispensables.includes(name);
+        
         const row = document.createElement("div");
         row.className = `master-item-row ${isChecked ? 'checked' : ''} level-${level}`;
         
         row.innerHTML = `
-          <div class="master-item-left">
+          <div class="master-item-left" style="display:flex; align-items:center; gap:6px;">
             <input type="checkbox" data-name="${name}" ${isChecked ? 'checked' : ''}>
+            <button class="btn-pin-priority ${isIndispensable ? 'active' : ''}" data-name="${name}" title="Fijar ingrediente prioritario" style="background:transparent; border:none; padding:4px; display:inline-flex; align-items:center; cursor:pointer; color:inherit; opacity: ${isIndispensable ? '1' : '0.25'};">
+              ${PIN_SVG}
+            </button>
             <span class="master-item-name">${name}</span>
           </div>
           <div class="master-item-actions">
@@ -915,6 +1099,13 @@ document.addEventListener("DOMContentLoaded", () => {
         `;
         
         const checkbox = row.querySelector('input[type="checkbox"]');
+        const pinBtn = row.querySelector(".btn-pin-priority");
+        
+        pinBtn.addEventListener("click", (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          togglePriority(name);
+        });
         
         // Checklist toggle
         checkbox.addEventListener("change", () => {
@@ -958,16 +1149,22 @@ document.addEventListener("DOMContentLoaded", () => {
         });
 
         // Edit Ingredient
-        row.querySelector(".btn-item-action.edit").addEventListener("click", (e) => {
+        row.querySelector(".btn-item-action.edit").addEventListener("click", async (e) => {
           e.preventDefault();
           e.stopPropagation();
-          const newName = prompt("Editar nombre del ingrediente:", name);
+          const newName = await showConfirm({
+            title: "Editar Ingrediente",
+            message: "Modifica el nombre del ingrediente:",
+            isPrompt: true,
+            defaultValue: name,
+            confirmText: "Guardar"
+          });
           if (newName && newName.trim() !== "" && newName.trim() !== name) {
             const trimmed = newName.trim();
             // Check if already exists
             const alreadyExists = state.despensa_viva.alacena_maestra.includes(trimmed);
             if (alreadyExists) {
-              alert("Este ingrediente ya existe.");
+              showToast("Este ingrediente ya existe.", "warning");
               return;
             }
             // Update in alacena_maestra
@@ -994,10 +1191,15 @@ document.addEventListener("DOMContentLoaded", () => {
         });
 
         // Delete Ingredient
-        row.querySelector(".btn-item-action.delete").addEventListener("click", (e) => {
+        row.querySelector(".btn-item-action.delete").addEventListener("click", async (e) => {
           e.preventDefault();
           e.stopPropagation();
-          const confirmDelete = confirm(`¿Eliminar "${name}" de la biblioteca?`);
+          const confirmDelete = await showConfirm({
+            title: "Eliminar Ingrediente",
+            message: `¿Eliminar "${name}" de la biblioteca?`,
+            isDestructive: true,
+            confirmText: "Eliminar"
+          });
           if (confirmDelete) {
             state.despensa_viva.alacena_maestra = state.despensa_viva.alacena_maestra.filter(n => n !== name);
             delete state.despensa_viva.alacena[name];
@@ -1069,14 +1271,16 @@ document.addEventListener("DOMContentLoaded", () => {
     const pantryLevels = state.despensa_viva.alacena || {};
     
     const filteredIngredients = activeIngredients.filter(name => {
-      return !q || name.toLowerCase().includes(q);
+      const matchesSearch = !q || name.toLowerCase().includes(q);
+      const matchesPriority = !filterOnlyPriority || (state.despensa_viva.indispensables && state.despensa_viva.indispensables.includes(name));
+      return matchesSearch && matchesPriority;
     });
 
     if (filteredIngredients.length === 0) {
       pantryCategoriesContainer.innerHTML = `
         <div class="section-card" style="text-align: center; padding: 40px 20px; border-radius:0;">
-          <p style="font-size: 15px; margin-bottom: 8px;">🚫 Ningún ingrediente activo coincide.</p>
-          <p class="subtitle" style="margin: 0;">Selecciona ingredientes en la pestaña <strong>Infraestructura</strong>.</p>
+          <p style="font-size: 15px; margin-bottom: 8px; font-weight: 600;">Ningún ingrediente activo coincide.</p>
+          <p class="subtitle" style="margin: 0;">Activa ingredientes en la <strong>Biblioteca de Ingredientes</strong> más abajo.</p>
         </div>
       `;
       updateSummaryCounts();
@@ -1105,8 +1309,11 @@ document.addEventListener("DOMContentLoaded", () => {
       const catSection = document.createElement("div");
       catSection.className = "category-section";
       
+      const icon = CATEGORY_ICONS[catKey] || "";
       catSection.innerHTML = `
-        <h3 class="category-title collapsible-header">${CATEGORY_LABELS[catKey]}</h3>
+        <h3 class="category-title collapsible-header" style="display:flex; align-items:center;">
+          ${icon}<span>${CATEGORY_LABELS[catKey]}</span>
+        </h3>
         <div class="pantry-items-grid collapsible-content" id="grid-cat-${catKey}"></div>
       `;
       
@@ -1120,18 +1327,32 @@ document.addEventListener("DOMContentLoaded", () => {
       
       items.forEach(name => {
         const level = pantryLevels[name] || "optimo";
+        const isIndispensable = state.despensa_viva.indispensables && state.despensa_viva.indispensables.includes(name);
         
         const card = document.createElement("div");
-        card.className = `pantry-item-card level-${level}`;
+        card.className = `pantry-item-card level-${level} ${isIndispensable ? 'indispensable' : ''}`;
         
-        // Render simple text row with uppercase tag
+        // Render text row with Pin button
         card.innerHTML = `
-          <div class="pantry-item-name">${name}</div>
+          <div class="pantry-item-left" style="display:flex; align-items:center; gap:8px;">
+            <button class="btn-pin-priority ${isIndispensable ? 'active' : ''}" data-name="${name}" title="Fijar ingrediente prioritario" style="background:transparent; border:none; padding:4px; display:inline-flex; align-items:center; cursor:pointer; color:inherit; opacity: ${isIndispensable ? '1' : '0.25'};">
+              ${PIN_SVG}
+            </button>
+            <div class="pantry-item-name">${name}</div>
+          </div>
           <span class="pantry-status-badge">${LEVEL_LABELS[level]}</span>
         `;
         
+        const pinBtn = card.querySelector(".btn-pin-priority");
+        pinBtn.addEventListener("click", (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          togglePriority(name);
+        });
+        
         // Tap to cycle levels: Optimo ➔ Medio ➔ Critico ➔ Agotado
-        card.addEventListener("click", () => {
+        card.addEventListener("click", (e) => {
+          if (e.target.closest(".btn-pin-priority")) return;
           const currentLevel = state.despensa_viva.alacena[name] || "optimo";
           const currentIndex = LEVELS.indexOf(currentLevel);
           const nextIndex = (currentIndex + 1) % LEVELS.length;
@@ -1301,7 +1522,9 @@ Basándote en este contexto, por favor genera una propuesta de menú detallada c
     activeList.forEach(name => {
       const lvl = levels[name] || "optimo";
       if (lists[lvl]) {
-        lists[lvl].push(name);
+        const isIndispensable = data.despensa_viva.indispensables && data.despensa_viva.indispensables.includes(name);
+        const displayName = isIndispensable ? `${name} (* Prioritario)` : name;
+        lists[lvl].push(displayName);
       }
     });
 
@@ -1342,15 +1565,15 @@ Basándote en este contexto, por favor genera una propuesta de menú detallada c
 * **Dieta / Filosofía:** ${dietName}
 * **Alergias / Restricciones:** ${allergiesStr}
 
-## ☯️ Perfil Energético (MTC / BaZi)
+## Perfil Energético (MTC / BaZi)
 * **Day Master:** ${dayMaster}
 * **Elemento Dominante:** ${dominant} | **Deficiente:** ${deficient}
 * **Patrón MTC:** ${pattern}
 
-## 🚒 Escuadrón de Rescate (Consumir prioritariamente)
+## Escuadrón de Rescate (Consumir prioritariamente)
 ${data.ejecucion.rescate_perecederos.trim() ? `> ${data.ejecucion.rescate_perecederos.trim()}` : `*Ninguno declarado. ¡Excelente!*`}
 
-## 🛠️ El Taller (Capacidad Instalada)
+## El Taller (Capacidad Instalada)
 * **Maquinaria:** ${activeMachinery.length > 0 ? activeMachinery.join(", ") : "Ninguna"}
 * **Utensilios:** ${activeUtensils.length > 0 ? activeUtensils.join(", ") : "Ninguno"}
 * **Envases de Almacenamiento:**
@@ -1358,7 +1581,7 @@ ${data.ejecucion.rescate_perecederos.trim() ? `> ${data.ejecucion.rescate_perece
   * Medianos: ${storageCategories.medianos.length > 0 ? storageCategories.medianos.join(", ") : "Ninguno"}
   * Pequeños: ${storageCategories.pequenos.length > 0 ? storageCategories.pequenos.join(", ") : "Ninguno"}
 
-## 🥑 Inventario de Despensa Viva
+## Inventario de Despensa Viva
 * **AGOTADO (Comprar urgente):** ${lists.agotado.length > 0 ? lists.agotado.join(", ") : "Ninguno"}
 * **CRÍTICO (Consumir hoy/mañana y reponer):** ${lists.critico.length > 0 ? lists.critico.join(", ") : "Ninguno"}
 * **MEDIO (Consumir moderado):** ${lists.medio.length > 0 ? lists.medio.join(", ") : "Ninguno"}
@@ -1413,7 +1636,7 @@ ${data.ejecucion.rescate_perecederos.trim() ? `> ${data.ejecucion.rescate_perece
     showToast("Archivo JSON de contexto descargado.", "success");
   });
 
-  // --- Database Backups triggers (Infraestructura tab & Settings Modal) ---
+  // --- Database Backups triggers (Settings Modal) ---
   function triggerBackupDownload() {
     DB.exportToFile(state);
     showToast("Respaldo de base de datos descargado.", "success");
@@ -1458,8 +1681,13 @@ ${data.ejecucion.rescate_perecederos.trim() ? `> ${data.ejecucion.rescate_perece
     });
   }
 
-  function triggerFactoryReset() {
-    const confirmReset = confirm("🚨 ¿Deseas reiniciar de fábrica? Esto vaciará permanentemente tus inventarios locales.");
+  async function triggerFactoryReset() {
+    const confirmReset = await showConfirm({
+      title: "Reiniciar de Fábrica",
+      message: "¿Deseas reiniciar de fábrica? Esto vaciará permanentemente tus inventarios locales.",
+      isDestructive: true,
+      confirmText: "Reiniciar"
+    });
     if (confirmReset) {
       state = DB.reset();
       filterUI();
@@ -1508,6 +1736,24 @@ ${data.ejecucion.rescate_perecederos.trim() ? `> ${data.ejecucion.rescate_perece
       return found.category;
     }
     return "despensa";
+  }
+
+  function togglePriority(name) {
+    if (!state.despensa_viva.indispensables) {
+      state.despensa_viva.indispensables = [];
+    }
+    if (state.despensa_viva.indispensables.includes(name)) {
+      state.despensa_viva.indispensables = state.despensa_viva.indispensables.filter(n => n !== name);
+      showToast(`"${name}" quitado de prioritarios.`, "warning");
+    } else {
+      state.despensa_viva.indispensables.push(name);
+      showToast(`"${name}" marcado como prioritario.`, "success");
+    }
+    DB.save(state);
+    triggerSaveIndicator();
+    
+    // Refresh lists
+    filterUI();
   }
 
   function updateSummaryCounts() {

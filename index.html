@@ -59,13 +59,13 @@
       </div>
       
       <nav class="sidebar-nav">
-        <button class="nav-btn active" data-tab="infraestructura" id="btn-tab-infraestructura">
+        <button class="nav-btn active" data-tab="taller" id="btn-tab-taller">
           <span class="icon-svg">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>
             </svg>
           </span>
-          <span class="label">Infraestructura</span>
+          <span class="label">El Taller</span>
         </button>
         <button class="nav-btn" data-tab="despensa" id="btn-tab-despensa">
           <span class="icon-svg">
@@ -98,11 +98,7 @@
     <!-- Main Content Area -->
     <div class="main-layout">
       <!-- Top Bar (Desktop & Tablet) -->
-      <header class="top-bar">
-        <div class="search-box-top">
-          <span class="search-icon">🔍</span>
-          <input type="text" id="top-search" placeholder="Buscar equipo, utensilio o envase...">
-        </div>
+      <header class="top-bar" style="justify-content: flex-end;">
         <div class="top-actions">
           <button class="btn-add-item" id="btn-add-item-modal">+ Añadir Item</button>
           <span class="settings-icon" title="Configuración">
@@ -117,13 +113,23 @@
       <!-- Main Panels -->
       <main class="app-content">
         
-        <section class="tab-panel active" id="panel-infraestructura">
+        <section class="tab-panel active" id="panel-taller">
           <div class="panel-header" style="display: flex; justify-content: space-between; align-items: flex-start; gap: 16px;">
             <div>
-              <h2>Infraestructura</h2>
-              <p>Configura los recursos estáticos de tu cocina e ingredientes indispensables.</p>
+              <h2>El Taller</h2>
+              <p>Configura la capacidad física instalada: equipos, utensilios y envases de almacenamiento.</p>
             </div>
-            <button class="btn-add-item mobile-add-btn" id="btn-add-item-modal-infra" style="margin-top: 4px;">+ Añadir Item</button>
+            <button class="btn-add-item mobile-add-btn" id="btn-add-item-modal-taller" style="margin-top: 4px;">+ Añadir Item</button>
+          </div>
+
+          <div class="taller-actions-bar" style="margin-bottom: 24px; width: 100%;">
+            <div class="search-box-top" style="width: 100%; max-width: none;">
+              <span class="search-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="icon-svg-inline" style="width: 12px; height: 12px; display: inline-block; vertical-align: middle;"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+              </span>
+              <input type="text" id="taller-search" placeholder="Buscar en el taller (equipos, utensilios, envases)..." style="width: 100%;">
+              <button id="btn-clear-taller-search" class="btn-clear-search" style="display: none; position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: transparent; border: none; font-size: 16px; cursor: pointer; color: var(--color-text-muted);">×</button>
+            </div>
           </div>
 
           <!-- Machinery Grid -->
@@ -183,14 +189,52 @@
               </div>
             </div>
 
-          <!-- Alacena Maestra Configurator (Move inside Infraestructura) -->
+        </section>
+
+        <!-- Pestaña 2: La Despensa (Weekly Audit, Click to Cycle) -->
+        <section class="tab-panel" id="panel-despensa">
+          <div class="panel-header">
+            <h2>La Despensa</h2>
+            <p>Auditoría rápida. Haz clic/tap en un ingrediente para cambiar su nivel.</p>
+          </div>
+
+          <div class="pantry-actions-bar" style="display: flex; gap: 12px; margin-bottom: 24px; width: 100%;">
+            <div class="search-box-top" style="flex: 1; width: 100%;">
+              <span class="search-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="icon-svg-inline" style="width: 12px; height: 12px; display: inline-block; vertical-align: middle;"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+              </span>
+              <input type="text" id="pantry-search" placeholder="Buscar ingrediente activo..." style="width: 100%;">
+              <button id="btn-clear-pantry-search" class="btn-clear-search" style="display: none; position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: transparent; border: none; font-size: 16px; cursor: pointer; color: var(--color-text-muted);">×</button>
+            </div>
+            <button id="btn-filter-priority" class="btn-filter-priority" title="Mostrar solo ingredientes prioritarios" style="display: flex; align-items: center; justify-content: center; background: transparent; border: 1px solid var(--border-color); padding: 8px 16px; font-family: var(--font-heading); font-size: 12px; font-weight: 700; cursor: pointer; text-transform: uppercase; letter-spacing: 0.05em; transition: all var(--transition-fast);">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon-svg-inline" style="width: 13px; height: 13px; margin-right: 6px;"><line x1="12" y1="17" x2="12" y2="22"></line><path d="M5 17h14v-1.76a2 2 0 0 0-.44-1.24l-2.78-3.5A2 2 0 0 1 15 9.26V5a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v4.26a2 2 0 0 1-.78 1.54l-2.78 3.5A2 2 0 0 0 5 15.24z"></path></svg>
+              <span>Prioritarios</span>
+            </button>
+          </div>
+
+          <div class="pantry-dashboard">
+            <div class="pantry-summary-bar">
+              <span class="summary-pill optimal">Óptimo: <strong id="count-optimal">0</strong></span>
+              <span class="summary-pill medium">Medio: <strong id="count-medium">0</strong></span>
+              <span class="summary-pill critical">Crítico: <strong id="count-critical">0</strong></span>
+              <span class="summary-pill empty">Agotado: <strong id="count-empty">0</strong></span>
+            </div>
+
+            <div class="pantry-categories" id="pantry-categories-container">
+              <!-- Dynamic category tables with click-to-cycle text fields -->
+            </div>
+          </div>
+
+          <!-- Biblioteca General de Ingredientes (Alacena Maestra) -->
           <div class="section-block">
-            <div class="section-header-line collapsible-header static-collapsible collapsed"><span>ALACENA MAESTRA (Biblioteca General)</span></div>
+            <div class="section-header-line collapsible-header static-collapsible collapsed"><span>BIBLIOTECA GENERAL DE INGREDIENTES</span></div>
             
             <div class="section-card collapsible-content collapsed">
               <div class="search-and-add">
                 <div class="search-box">
-                  <span class="search-icon">🔍</span>
+                  <span class="search-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="icon-svg-inline" style="width: 12px; height: 12px; display: inline-block; vertical-align: middle;"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                  </span>
                   <input type="text" id="ingredient-search" placeholder="Buscar ingrediente en la biblioteca...">
                 </div>
                 <div class="add-custom-box">
@@ -212,28 +256,6 @@
               </div>
             </div>
           </div>
-
-        </section>
-
-        <!-- Pestaña 2: La Despensa (Weekly Audit, Click to Cycle) -->
-        <section class="tab-panel" id="panel-despensa">
-          <div class="panel-header">
-            <h2>La Despensa</h2>
-            <p>Auditoría rápida. Haz clic/tap en un ingrediente para cambiar su nivel.</p>
-          </div>
-
-          <div class="pantry-dashboard">
-            <div class="pantry-summary-bar">
-              <span class="summary-pill optimal">Óptimo: <strong id="count-optimal">0</strong></span>
-              <span class="summary-pill medium">Medio: <strong id="count-medium">0</strong></span>
-              <span class="summary-pill critical">Crítico: <strong id="count-critical">0</strong></span>
-              <span class="summary-pill empty">Agotado: <strong id="count-empty">0</strong></span>
-            </div>
-
-            <div class="pantry-categories" id="pantry-categories-container">
-              <!-- Dynamic category tables with click-to-cycle text fields -->
-            </div>
-          </div>
         </section>
 
         <!-- Pestaña 3: El Molino (Acción, Hormonas, Rescate, Prompt) -->
@@ -248,7 +270,10 @@
             <div class="col">
               <!-- Biological Phase Selector -->
               <div class="section-card">
-                <h3 class="collapsible-header static-collapsible">🗓️ Ciclo Biológico & Temporal</h3>
+                <h3 class="collapsible-header static-collapsible" style="display:flex; align-items:center;">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon-svg-inline" style="width: 14px; height: 14px; margin-right: 8px; vertical-align: middle;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                  <span>Ciclo Biológico & Temporal</span>
+                </h3>
                 
                 <div class="collapsible-content">
                   <div class="form-group">
@@ -274,7 +299,10 @@
 
               <!-- Preferencias Alimenticias (Collapsed by default) -->
               <div class="section-card">
-                <h3 class="collapsible-header static-collapsible collapsed">🥑 Preferencias Alimenticias</h3>
+                <h3 class="collapsible-header static-collapsible collapsed" style="display:flex; align-items:center;">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon-svg-inline" style="width: 14px; height: 14px; margin-right: 8px; vertical-align: middle;"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 3.5 0 8.5C17 15 15 20 11 20z"></path><path d="M19 2c-2.26 4.33-5.27 7.14-8 10"></path></svg>
+                  <span>Preferencias Alimenticias</span>
+                </h3>
                 
                 <div class="collapsible-content collapsed">
                   <div class="form-group">
@@ -363,7 +391,10 @@
 
               <!-- MTC / BaZi Selections (Collapsed by default, optional) -->
               <div class="section-card">
-                <h3 class="collapsible-header static-collapsible collapsed">☯️ Perfil Energético (MTC & BaZi)</h3>
+                <h3 class="collapsible-header static-collapsible collapsed" style="display:flex; align-items:center;">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon-svg-inline" style="width: 14px; height: 14px; margin-right: 8px; vertical-align: middle;"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a10 10 0 0 1 0 20 5 5 0 0 1 0-10 5 5 0 0 0 0-10"></path><circle cx="12" cy="7" r="1" fill="currentColor"></circle><circle cx="12" cy="17" r="1" fill="currentColor"></circle></svg>
+                  <span>Perfil Energético (MTC & BaZi)</span>
+                </h3>
                 
                 <div class="collapsible-content collapsed">
                   <p class="subtitle" style="margin-bottom: 12px;">Opcional. Utiliza una calculadora BaZi externa y registra tu perfil metabólico-energético.</p>
@@ -427,7 +458,10 @@
 
               <!-- Escuadrón de Rescate -->
               <div class="section-card">
-                <h3 class="collapsible-header static-collapsible">🚒 Escuadrón de Rescate (Perecederos)</h3>
+                <h3 class="collapsible-header static-collapsible" style="display:flex; align-items:center;">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon-svg-inline" style="width: 14px; height: 14px; margin-right: 8px; vertical-align: middle;"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="4"></circle><line x1="4.93" y1="4.93" x2="9.17" y2="9.17"></line><line x1="14.83" y1="14.83" x2="19.07" y2="19.07"></line><line x1="14.83" y1="9.17" x2="19.07" y2="4.93"></line><line x1="4.93" y1="19.07" x2="9.17" y2="14.83"></line></svg>
+                  <span>Escuadrón de Rescate (Perecederos)</span>
+                </h3>
                 <div class="collapsible-content">
                   <div class="form-group">
                     <textarea id="textarea-rescue" placeholder="Escribe qué alimentos de tu nevera se van a dañar hoy o mañana..."></textarea>
@@ -443,7 +477,10 @@
             <div class="col">
               <div class="section-card main-prompt-card">
                 <div class="prompt-header">
-                  <h3>📜 Tu Prompt Maestro Conversacional</h3>
+                  <h3 style="display:flex; align-items:center;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon-svg-inline" style="width: 14px; height: 14px; margin-right: 8px; vertical-align: middle;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                    <span>Tu Prompt Maestro Conversacional</span>
+                  </h3>
                   
                   <div class="prompt-actions">
                     <!-- Clean SVG copy button icon (No text) -->
@@ -477,13 +514,13 @@
 
     <!-- Mobile Bottom Navigation (Visible only on Mobile) -->
     <nav class="mobile-bottom-nav">
-      <button class="nav-btn active" data-tab="infraestructura">
+      <button class="nav-btn active" data-tab="taller">
         <span class="icon-svg">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>
           </svg>
         </span>
-        <span class="label">Infraestructura</span>
+        <span class="label">Taller</span>
       </button>
       <button class="nav-btn" data-tab="despensa">
         <span class="icon-svg">
@@ -526,6 +563,7 @@
             <option value="utensilio">Utensilio / Menaje</option>
             <option value="almacenamiento">Envase de Almacenamiento</option>
           </select>
+          <div id="modal-type-change-warning" class="form-help-text" style="display:none; color: var(--color-level-medio); margin-top: 6px; font-weight: 500;"></div>
         </div>
         
         <div class="form-group">
@@ -606,22 +644,45 @@
           <label>Copias de Seguridad</label>
           <div class="settings-actions-grid" style="display: flex; flex-direction: column; gap: 12px; margin-top: 8px;">
             <button class="btn-primary" id="btn-settings-download" style="width: 100%; justify-content: center; display: flex; align-items: center; gap: 8px;">
-              <span>📥</span> Exportar Base de Datos
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon-svg-inline" style="width:14px; height:14px; display:inline-block;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+              <span>Exportar Base de Datos</span>
             </button>
             
             <label class="btn-primary" id="btn-settings-upload-label" style="width: 100%; justify-content: center; display: flex; align-items: center; gap: 8px; cursor: pointer; text-align: center; box-sizing: border-box; padding: 10px;">
-              <span>📤</span> Importar Base de Datos
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon-svg-inline" style="width:14px; height:14px; display:inline-block;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+              <span>Importar Base de Datos</span>
               <input type="file" id="input-settings-upload-json" accept=".json" style="display: none;">
             </label>
             
             <button class="btn-cancel" id="btn-settings-reset" style="width: 100%; border: 1px solid var(--color-level-critico); color: var(--color-level-critico); background: transparent; justify-content: center; display: flex; align-items: center; gap: 8px;">
-              <span>⚠️</span> Reiniciar de Fábrica
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon-svg-inline" style="width:14px; height:14px; display:inline-block;"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><circle cx="12" cy="17" r="0.01"></circle></svg>
+              <span>Reiniciar de Fábrica</span>
             </button>
           </div>
         </div>
       </div>
       <div class="modal-footer">
         <button class="btn-primary" id="btn-close-settings-footer" style="width: 100%;">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sharp Edged Confirm Modal Dialog -->
+  <div class="modal-backdrop" id="confirm-modal">
+    <div class="modal-card confirm-card" style="max-width: 360px;">
+      <div class="modal-header">
+        <h3 id="confirm-title">Confirmación</h3>
+        <button class="modal-close" id="btn-close-confirm">×</button>
+      </div>
+      <div class="modal-body">
+        <p id="confirm-message" style="font-size: 13px; line-height: 1.5; color: var(--color-dark); margin: 0;"></p>
+        <div id="confirm-prompt-container" style="display: none; margin-top: 12px;">
+          <input type="text" id="confirm-prompt-input" placeholder="Escribe aquí..." style="box-sizing: border-box; width: 100%;">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-cancel" id="btn-cancel-confirm">Cancelar</button>
+        <button class="btn-primary" id="btn-save-confirm">Confirmar</button>
       </div>
     </div>
   </div>

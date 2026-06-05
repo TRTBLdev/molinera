@@ -57,10 +57,10 @@ const INGREDIENTS_CATALOG = [
 ];
 
 const CATEGORY_LABELS = {
-  proteinas: "🍗 Proteínas (Carnes, Legumbres, Huevos)",
-  carbohidratos: "🌾 Carbohidratos (Granos, Harinas, Tubérculos)",
-  grasas: "🥑 Grasas y Aceites (Semillas, Frutos Secos)",
-  vegetales: "🥬 Vegetales y Frutas",
-  despensa: "🥛 Básicos de Despensa (Lácteos y Alternativas)",
-  condimentos: "🧂 Especias, Hierbas y Condimentos"
+  proteinas: "Proteínas (Carnes, Legumbres, Huevos)",
+  carbohidratos: "Carbohidratos (Granos, Harinas, Tubérculos)",
+  grasas: "Grasas y Aceites (Semillas, Frutos Secos)",
+  vegetales: "Vegetales y Frutas",
+  despensa: "Básicos de Despensa (Lácteos y Alternativas)",
+  condimentos: "Especias, Hierbas y Condimentos"
 };

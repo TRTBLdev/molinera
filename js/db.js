@@ -45,7 +45,8 @@ const INITIAL_STATE = {
   },
   despensa_viva: {
     alacena_maestra: [],
-    alacena: {}
+    alacena: {},
+    indispensables: []
   },
   ejecucion: {
     tipo_planificacion: "semanal",
